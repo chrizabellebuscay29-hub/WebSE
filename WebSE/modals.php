@@ -43,20 +43,35 @@
         include("connection.php");
         $res = mysqli_query($conn, "SELECT id, Fisherman FROM tbl_workersdata");
         while ($row = mysqli_fetch_assoc($res)) {
-          echo "<option value='{$row['id']}'>{$row['Fisherman']}</option>";
+          echo "<option value='{$row['Fisherman']}'>{$row['Fisherman']}</option>";
         }
         ?>
       </select>
+
       <label>Type of Feeds:</label>
-      <input id="expense-category" name="TypeofFeeds" class="input" required />
+      <select id="expense-category" name="TypeofFeeds" class="input" required>
+        <option value="">-- Select Feed --</option>
+        <?php
+        $feeds_res = mysqli_query($conn, "SELECT ID, NameofFeeds, Price FROM tbl_feeds");
+        $feeds_array = [];
+        while ($feed = mysqli_fetch_assoc($feeds_res)) {
+          echo "<option value='{$feed['NameofFeeds']}' data-price='{$feed['Price']}'>{$feed['NameofFeeds']}</option>";
+        }
+        ?>
+      </select>
+
       <label>Price:</label>
-      <input id="expense-price" name="Price" class="input" type="number" required />
+      <input id="expense-price" name="Price" class="input" type="number" min="0" step="0.01" required readonly />
+
       <label>Quantity:</label>
-      <input id="expense-quantity" name="Quantity" class="input" type="number" required />
+      <input id="expense-quantity" name="Quantity" class="input" type="number" min="0" step="0.01" required />
+
       <label>Total Amount:</label>
-      <input id="expense-amount" name="TotalAmount" class="input" type="number" required />
+      <input id="expense-amount" name="TotalAmount" class="input" type="number" step="0.01" readonly />
+
       <label>Date:</label>
       <input id="expense-date" name="TransactionDate" class="input" type="date" required />
+
       <button class="btn btn-primary" type="submit">Save Expense</button>
       <button type="button" class="btn btn-secondary" onclick="handleExpenseCancel()">Cancel</button>
     </form>
@@ -73,31 +88,33 @@
     </div>
     <form method="POST" action="addharvest.php" id="harvest-form" class="modal-body">
       <label>Full Name:</label>
-      <select id="harvest-worker" name="Fisherman" class="select" required>
-        <?php
-$res = mysqli_query($conn, "SELECT id, Fisherman FROM tbl_workersdata");
-while ($row = mysqli_fetch_assoc($res)) {
-  echo "<option value='{$row['Fisherman']}'>{$row['Fisherman']}</option>";
-}
-?>
+     <select id="harvest-worker" name="Fisherman" class="select" required>
+  <?php
+  $res = mysqli_query($conn, "SELECT Fisherman, AmountofSimilia FROM tbl_workersdata");
+  while ($row = mysqli_fetch_assoc($res)) {
+    echo "<option value='{$row['Fisherman']}' data-similia='{$row['AmountofSimilia']}'>{$row['Fisherman']}</option>";
+  }
+  ?>
+</select>
+
 
       </select>
       <label>Kilo of Fish:</label>
       <input id="harvest-kilo" name="KiloofFish" class="input" type="number" step="0.01" required />
       <label>Price per Kilo:</label>
-      <input id="harvest-price" name="PricePerkilo" class="input" type="number" step="0.01" required />
+      <input id="harvest-price" name="Priceperkilo" class="input" type="number" step="0.01" required />
       <label>Subtotal:</label>
-      <input id="harvest-subtotal" name="Subtotal" class="input" type="number" step="0.01" required />
+      <input id="harvest-subtotal" name="Subtotal" class="input" type="number" step="0.01" required readonly />
       <label>Amount of Similia:</label>
-      <input id="harvest-similia" name="AmountofSimilia" class="input" type="number" step="0.01" required />
+      <input id="harvest-similia" name="AmountofSimilia" class="input" type="number" step="0.01" required readonly  />
       <label>Amount of Feeds:</label>
       <input id="harvest-feeds" name="AmountofFeeds" class="input" type="number" step="0.01" required />
       <label>Total Expenses:</label>
-      <input id="harvest-expenses" name="TotalExpense" class="input" type="number" step="0.01" required />
+      <input id="harvest-expenses" name="TotalExpense" class="input" type="number" step="0.01" required readonly />
       <label>Profit Details:</label>
-      <input id="harvest-profit" name="Profit" class="input" type="number" step="0.01" required />
+      <input id="harvest-profit" name="Profit" class="input" type="number" step="0.01" required readonly />
       <label>Divided Profit:</label>
-      <input id="harvest-divprofit" name="Dividedprofit" class="input" type="number" step="0.01" required />
+      <input id="harvest-divprofit" name="Dividedprofit" class="input" type="number" step="0.01" required readonly />
       <label>Date:</label>
       <input id="harvest-date" name="Date" class="input" type="date" required />
       <button class="btn btn-primary" type="submit">Save Harvest</button>
@@ -119,7 +136,7 @@ while ($row = mysqli_fetch_assoc($res)) {
     </div>
     <form method="POST" action="addtransaction.php" id="transaction-form" class="modal-body">
       <label>Name of Feeds:</label>
-      <input id="transaction-category" name="NameofFeeds" class="input" required />
+      <input id="transaction-category" name="NameofFeeds" type="text" class="input" required />
       <label>Price per piece:</label>
       <input id="transaction-price" name="Price" class="input" type="number" required />
       <label>Quantity:</label>
@@ -143,4 +160,56 @@ function closeWorkerDialog(){document.getElementById("worker-dialog").classList.
 function closeExpenseDialog(){document.getElementById("expense-dialog").classList.remove("active");}
 function closeHarvestDialog(){document.getElementById("harvest-dialog").classList.remove("active");}
 function closeTransactionDialog(){document.getElementById("transaction-dialog").classList.remove("active");}
+
+
+document.addEventListener("DOMContentLoaded", function() {
+  const kiloInput = document.getElementById("harvest-kilo");
+  const priceInput = document.getElementById("harvest-price");
+  const subtotalInput = document.getElementById("harvest-subtotal");
+  const similiaInput = document.getElementById("harvest-similia");
+  const feedsInput = document.getElementById("harvest-feeds");
+  const expensesInput = document.getElementById("harvest-expenses");
+  const profitInput = document.getElementById("harvest-profit");
+  const divProfitInput = document.getElementById("harvest-divprofit");
+  const workerSelect = document.getElementById("harvest-worker");
+
+  function updateSubtotal() {
+    const kilo = parseFloat(kiloInput.value) || 0;
+    const price = parseFloat(priceInput.value) || 0;
+    subtotalInput.value = (kilo * price).toFixed(2);
+    updateCalculations();
+  }
+
+  function updateSimilia() {
+    const selectedOption = workerSelect.options[workerSelect.selectedIndex];
+    const similia = parseFloat(selectedOption.getAttribute("data-similia")) || 0;
+    similiaInput.value = similia.toFixed(2);
+    updateCalculations();
+  }
+
+  function updateCalculations() {
+    const similia = parseFloat(similiaInput.value) || 0;
+    const feeds = parseFloat(feedsInput.value) || 0;
+    const subtotal = parseFloat(subtotalInput.value) || 0;
+
+    const totalExpenses = similia + feeds;
+    expensesInput.value = totalExpenses.toFixed(2);
+
+    const profit = subtotal - totalExpenses;
+    profitInput.value = profit.toFixed(2);
+
+    const dividedProfit = profit / 2;
+    divProfitInput.value = dividedProfit.toFixed(2);
+  }
+
+  // Event listeners
+  kiloInput.addEventListener("input", updateSubtotal);
+  priceInput.addEventListener("input", updateSubtotal);
+  feedsInput.addEventListener("input", updateCalculations);
+  workerSelect.addEventListener("change", updateSimilia);
+});
+
+
+
+
 </script>

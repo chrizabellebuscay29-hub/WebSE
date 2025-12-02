@@ -295,7 +295,8 @@ function fetchWorkers() {
           <p><strong>Age:</strong> ${worker.Age}</p>
           <p><strong>Date Started:</strong> ${worker.DateStarted}</p>
           
-          <button onclick="openWorkerDialog(${worker.id})">Edit</button>
+          <a class='btn btn-update' href='edit_workers.php?id=${worker.id}'>Update</a>
+
           <button onclick="deleteWorker(${worker.id})">Delete</button>
         `;
         container.appendChild(div);
@@ -323,6 +324,28 @@ function deleteWorker(id) {
     body: new URLSearchParams({ id })
   }).then(() => fetchWorkers());
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+  const feedSelect = document.getElementById("expense-category");
+  const priceInput = document.getElementById("expense-price");
+  const quantityInput = document.getElementById("expense-quantity");
+  const totalInput = document.getElementById("expense-amount");
+
+  function calculateTotal() {
+    const price = parseFloat(priceInput.value) || 0;
+    const quantity = parseFloat(quantityInput.value) || 0;
+    totalInput.value = (price * quantity).toFixed(2);
+  }
+
+  feedSelect.addEventListener("change", function() {
+    const selectedOption = feedSelect.options[feedSelect.selectedIndex];
+    const feedPrice = parseFloat(selectedOption.getAttribute("data-price")) || 0;
+    priceInput.value = feedPrice.toFixed(2);
+    calculateTotal();
+  });
+
+  quantityInput.addEventListener("input", calculateTotal);
+});
 
   </script>
 </body>

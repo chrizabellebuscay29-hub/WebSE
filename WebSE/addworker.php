@@ -9,14 +9,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $DateStarted = $_POST['DateStarted'];
   
 // Handle file upload
-  $Picture = "";
+  $picturePath = "";
   if (!empty($_FILES['Picture']['name'])) {
     $targetDir = "uploads/";
     if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
     $fileName = time() . "_" . basename($_FILES['Picture']['name']);
     $targetFile = $targetDir . $fileName;
     if (move_uploaded_file($_FILES['Picture']['tmp_name'], $targetFile)) {
-      $Picture = $targetFile;
+      $picturePath = $targetFile;
     }
   }
 
