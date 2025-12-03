@@ -33,11 +33,11 @@ include("connection.php");
 }
 
 .worker-card {
-  border: 1px solid #ccc;
+  border: 1px solid #c3e4fa;
   border-radius: 8px;
   padding: 10px;
   text-align: left;
-  background-color: #f9f9f9;
+  background-color: #c3e4fa;
 }
 
 .worker-card button {
