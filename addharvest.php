@@ -1,8 +1,10 @@
 <?php
 include("connection.php");
+header("Content-Type: application/json");
+
+$response = ["success" => false, "message" => "", "data" => []];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get form data safely
     $Fisherman = mysqli_real_escape_string($conn, $_POST['Fisherman']);
     $KiloofFish = floatval($_POST['KiloofFish']);
     $Priceperkilo = floatval($_POST['Priceperkilo']);
@@ -10,25 +12,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $AmountofFeeds = floatval($_POST['AmountofFeeds']);
     $Date = mysqli_real_escape_string($conn, $_POST['Date']);
 
-    // Perform automatic calculations (same as JS)
     $Subtotal = $KiloofFish * $Priceperkilo;
     $TotalExpense = $AmountofSimilia + $AmountofFeeds;
     $Profit = $Subtotal - $TotalExpense;
     $Dividedprofit = $Profit / 2;
 
-    // Insert into database
-    $sql = "INSERT INTO tbl_profit
-            (Fisherman, KiloofFish, Priceperkilo, Subtotal, AmountofSimilia, 
-             AmountofFeeds, TotalExpense, Profit, Dividedprofit, Date)
-            VALUES 
-            ('$Fisherman', $KiloofFish, $Priceperkilo, $Subtotal, 
-             $AmountofSimilia, $AmountofFeeds, $TotalExpense, $Profit, $Dividedprofit, '$Date')";
+    $insert = mysqli_query($conn, "INSERT INTO tbl_profit
+        (Fisherman, KiloofFish, Priceperkilo, Subtotal, AmountofSimilia,
+         AmountofFeeds, TotalExpense, Profit, Dividedprofit, Date)
+         VALUES
+        ('$Fisherman', $KiloofFish, $Priceperkilo, $Subtotal,
+         $AmountofSimilia, $AmountofFeeds, $TotalExpense, $Profit, $Dividedprofit, '$Date')");
 
-    if (mysqli_query($conn, $sql)) {
-        header("Location: index.php");
-        exit;
+    if ($insert) {
+        $id = mysqli_insert_id($conn);
+        $record = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM tbl_profit WHERE id = $id"));
+
+        $response["success"] = true;
+        $response["message"] = "Harvest saved successfully!";
+        $response["data"] = $record;
     } else {
-        echo "Error inserting record: " . mysqli_error($conn);
+        $response["message"] = "Error saving harvest: " . mysqli_error($conn);
     }
 }
+
+echo json_encode($response);
 ?>

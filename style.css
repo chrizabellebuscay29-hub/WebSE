@@ -1,5 +1,3 @@
-
-
 .modal form label {
   font-weight: bold;
 }
@@ -67,7 +65,7 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background-color: #f8fcf8;
-    background-image: url(./bg/fisherman-1559753_1280.jpg);
+    background-image: url(./bg/fisherman-main.jpg);
     background-size: cover;
     background-attachment: fixed;
     background-position: center center;
@@ -1041,3 +1039,130 @@ h3 {
     justify-content: space-between;
 }
 
+/* ================= RECEIPT MODAL STYLING ================= */
+
+.receipt-modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #ffffff;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 12px;
+  border: 3px solid #2E549C;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: zoomIn 0.25s ease;
+  max-height: 85vh;
+  padding: 0; /* remove extra padding here */
+}
+
+/* HEADER */
+.receipt-header {
+  background-color: #082E76;
+  color: #F3F9FF;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 3px solid #2E549C;
+}
+
+.receipt-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.receipt-header .modal-close {
+  color: #F3F9FF;
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.receipt-header .modal-close:hover {
+  color: #FEBF19;
+}
+
+/* BODY */
+.receipt-body {
+  padding: 2rem; /* bigger padding inside modal body */
+  overflow-y: auto;
+  background-color: #F3F9FF;
+  flex: 1; /* takes remaining space */
+}
+
+.receipt-container {
+  background: white;
+  border: 3px solid #2E549C;
+  border-radius: 12px;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 25px 35px 35px 35px; /* <— note bottom padding */
+  box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+}
+
+
+/* ===== FIX: Align Buttons Properly Inside Receipt Modal ===== */
+
+.receipt-footer {
+  display: flex;
+  justify-content: flex-end; /* right-align buttons */
+  align-items: center;
+  gap: 16px;
+  padding: 1rem 2rem; /* more horizontal padding to prevent buttons touching edges */
+  background-color: #F3F9FF;
+  border-top: 2px solid #E6E9EE;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Buttons inside receipt */
+.btn-print,
+.btn-close {
+  min-width: 130px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Print Button */
+.btn-print {
+  background-color: #082E76;
+  color: #fff;
+}
+.btn-print:hover {
+  background-color: #2E549C;
+  transform: translateY(-2px);
+}
+
+/* Close Button */
+.btn-close {
+  background-color: #E11522;
+  color: #fff;
+}
+.btn-close:hover {
+  background-color: #ff4b5a;
+  transform: translateY(-2px);
+}
+
+/* Responsive Fix */
+@media (max-width: 600px) {
+  .receipt-footer {
+    flex-direction: column;
+  }
+  .btn-print,
+  .btn-close {
+    width: 100%;
+  }
+}

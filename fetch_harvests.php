@@ -1,20 +1,14 @@
 <?php
 include("connection.php");
-header('Content-Type: application/json');
 
-$search = "";
-if (isset($_GET['search']) && $_GET['search'] !== "") {
-    $search = mysqli_real_escape_string($conn, $_GET['search']);
-    $query = "SELECT * FROM tbl_profit WHERE Fisherman LIKE '%$search%' ORDER BY Date DESC";
-} else {
-    $query = "SELECT * FROM tbl_profit ORDER BY Date DESC";
-}
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$where = $search ? "WHERE Fisherman LIKE '%$search%'" : '';
 
-$result = mysqli_query($conn, $query);
+$result = mysqli_query($conn, "SELECT * FROM tbl_profit $where ORDER BY id DESC");
 $harvests = [];
 
 while ($row = mysqli_fetch_assoc($result)) {
-    $harvests[] = $row;
+  $harvests[] = $row;
 }
 
 echo json_encode($harvests);

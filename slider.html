@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fishing Operation Login</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #009ffd, #2a2a72);
+  overflow: hidden;
+  padding: 20px;
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 400px;
+  min-height: 540px;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.25);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  position: relative;
+  color: #fff;
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+.form-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.7s ease-in-out;
+}
+
+.sign-in { transform: translateY(0); z-index: 2; }
+.sign-up { transform: translateY(100%); z-index: 1; }
+.wrapper.active .sign-in { transform: translateY(-100%); z-index: 1; }
+.wrapper.active .sign-up { transform: translateY(0); z-index: 2; }
+
+.logo { text-align: center; margin-bottom: 10px; }
+.logo img { width: 60px; height: 60px; }
+.logo h3 { font-size: 18px; font-weight: 600; margin-top: 5px; }
+
+h2 { font-size: 24px; font-weight: 600; margin-bottom: 10px; text-align: center; }
+
+form {
+  width: 85%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.85);
+  border-radius: 8px;
+  padding: 0 12px;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.input-box i {
+  color: #0078ff;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.input-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 12px;
+  font-size: 15px;
+  background: transparent;
+  color: #333;
+}
+
+.input-box .toggle-password {
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 17px;
+  color: #0078ff;
+}
+
+.error-msg {
+  width: 100%;
+  color: #ff4d4d;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 4px;
+  text-align: left;
+  min-height: 18px;
+}
+
+button {
+  width: 100%;
+  padding: 12px 15px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover { background: linear-gradient(135deg, #0099e0, #005dd1); }
+
+.switch {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #fff;
+}
+
+.switch a {
+  color: #00c6ff;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.bubbles {
+  position: absolute;
+  bottom: -10px;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.bubble {
+  position: absolute;
+  bottom: -10px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  animation: rise 6s infinite ease-in;
+}
+
+@keyframes rise {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-800px) scale(1.2); opacity: 0; }
+}
+
+@media (max-width: 480px) {
+  .wrapper { max-width: 100%; padding: 15px 0; }
+  .logo img { width: 50px; height: 50px; }
+  h2 { font-size: 22px; }
+  button { font-size: 15px; padding: 10px 12px; }
+  .switch { font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrapper" id="wrapper">
+
+  <!-- Login Form -->
+  <div class="form-container sign-in">
+    <div class="logo">
+      <img src="https://cdn-icons-png.flaticon.com/512/2921/2921822.png" alt="boat logo" />
+      <h3>Fishing Operation Manager</h3>
+    </div>
+    <form id="loginForm">
+      <h2>Login</h2>
+      <div class="input-box">
+        <i class="fa-solid fa-envelope"></i>
+        <input type="email" name="email" placeholder="Email" required />
+      </div>
+      <div class="input-box">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" name="password" placeholder="Password" required />
+        <i class="fa-solid fa-eye toggle-password"></i>
+      </div>
+      <div class="error-msg" id="loginError"></div>
+      <button type="submit">Login</button>
+      <p class="switch">Don’t have an account? <a id="showSignup">Sign Up</a></p>
+    </form>
+  </div>
+
+  <!-- Signup Form -->
+  <div class="form-container sign-up">
+    <div class="logo">
+      <img src="https://cdn-icons-png.flaticon.com/512/2921/2921822.png" alt="boat logo" />
+      <h3>Fishing Operation Manager</h3>
+    </div>
+    <form id="signupForm">
+      <h2>Register</h2>
+      <div class="input-box">
+        <i class="fa-solid fa-user"></i>
+        <input type="text" name="username" placeholder="Username" required />
+      </div>
+      <div class="input-box">
+        <i class="fa-solid fa-envelope"></i>
+        <input type="email" name="email" placeholder="Email" required />
+      </div>
+      <div class="input-box">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" name="password" placeholder="Password" required />
+        <i class="fa-solid fa-eye toggle-password"></i>
+      </div>
+
+      <!-- Hidden Admin Code (optional) -->
+      <div class="input-box" style="display:none;">
+        <i class="fa-solid fa-key"></i>
+        <input type="text" name="admin_code" placeholder="Admin Code (optional)">
+      </div>
+
+      <div class="error-msg" id="signupError"></div>
+      <button type="submit">Create Account</button>
+      <p class="switch">Already have an account? <a id="showLogin">Login</a></p>
+    </form>
+  </div>
+
+  <div class="bubbles">
+    <div class="bubble" style="left:10%; width:10px; height:10px; animation-delay:0s;"></div>
+    <div class="bubble" style="left:30%; width:14px; height:14px; animation-delay:1s;"></div>
+    <div class="bubble" style="left:50%; width:8px; height:8px; animation-delay:2s;"></div>
+    <div class="bubble" style="left:70%; width:16px; height:16px; animation-delay:3s;"></div>
+    <div class="bubble" style="left:90%; width:12px; height:12px; animation-delay:4s;"></div>
+  </div>
+
+</div>
+
+<script>
+const wrapper = document.getElementById('wrapper');
+const showSignup = document.getElementById('showSignup');
+const showLogin = document.getElementById('showLogin');
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
+
+// Toggle between forms
+showSignup.addEventListener('click', ()=> wrapper.classList.add('active'));
+showLogin.addEventListener('click', ()=> wrapper.classList.remove('active'));
+
+// Toggle password visibility
+document.querySelectorAll('.toggle-password').forEach(icon=>{
+  icon.addEventListener('click', ()=>{
+    const input = icon.previousElementSibling;
+    if(input.type === "password"){ input.type = "text"; icon.classList.add('fa-eye-slash'); }
+    else{ input.type = "password"; icon.classList.remove('fa-eye-slash'); }
+  });
+});
+
+// Signup AJAX
+signupForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const formData = new FormData(signupForm);
+  fetch('register.php', { method:'POST', body: formData })
+    .then(res=>res.json())
+    .then(data=>{
+      const signupError = document.getElementById('signupError');
+      if(data.success){
+        signupError.style.color = "lightgreen";
+        signupError.textContent = data.message;
+        setTimeout(()=>{
+          wrapper.classList.remove('active');
+          signupForm.reset();
+          signupError.textContent = "";
+        }, 1200);
+      } else {
+        signupError.style.color = "#ff4d4d";
+        signupError.textContent = data.message;
+      }
+    });
+});
+
+// Login AJAX
+loginForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const formData = new FormData(loginForm);
+  fetch('login.php', { method:'POST', body: formData })
+    .then(res=>res.json())
+    .then(data=>{
+      const loginError = document.getElementById('loginError');
+      if(data.success){
+        loginError.style.color = "lightgreen";
+        loginError.textContent = data.message;
+        // Redirect based on role
+        if(data.role === 'admin'){
+          window.location.href = 'index.php';
+        } else {
+          window.location.href = 'user.php';
+        }
+      } else {
+        loginError.style.color = "#ff4d4d";
+        loginError.textContent = data.message;
+      }
+    });
+});
+</script>
+</body>
+</html>

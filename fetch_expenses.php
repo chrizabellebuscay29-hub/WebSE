@@ -1,20 +1,17 @@
 <?php
 include("connection.php");
 
-$search = "";
-if (isset($_GET['search']) && $_GET['search'] !== "") {
-    $search = mysqli_real_escape_string($conn, $_GET['search']);
-    $query = "SELECT * FROM tbl_transactions WHERE Fisherman LIKE '%$search%' ORDER BY TransactionDate DESC";
-} else {
-    $query = "SELECT * FROM tbl_transactions ORDER BY TransactionDate DESC";
-}
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$where = $search ? "WHERE Fisherman LIKE '%$search%'" : '';
 
+$query = "SELECT * FROM tbl_transactions $where ORDER BY id DESC";
 $result = mysqli_query($conn, $query);
-$expenses = [];
 
+$expenses = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    $expenses[] = $row;
+  $expenses[] = $row;
 }
 
+header('Content-Type: application/json');
 echo json_encode($expenses);
 ?>

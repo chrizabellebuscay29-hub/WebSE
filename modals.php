@@ -49,16 +49,25 @@
       </select>
 
       <label>Type of Feeds:</label>
-      <select id="expense-category" name="TypeofFeeds" class="input" required>
-        <option value="">-- Select Feed --</option>
-        <?php
-        $feeds_res = mysqli_query($conn, "SELECT ID, NameofFeeds, Price FROM tbl_feeds");
-        $feeds_array = [];
-        while ($feed = mysqli_fetch_assoc($feeds_res)) {
-          echo "<option value='{$feed['NameofFeeds']}' data-price='{$feed['Price']}'>{$feed['NameofFeeds']}</option>";
-        }
-        ?>
-      </select>
+     <select id="expense-category" name="TypeofFeeds" class="input" required>
+  <option value="">-- Select Feed --</option>
+  <?php
+  $feeds_res = mysqli_query($conn, "
+    SELECT NameofFeeds, Price, Quantity
+    FROM tbl_feeds
+    WHERE Quantity > 0
+    ORDER BY NameofFeeds ASC
+  ");
+  while ($feed = mysqli_fetch_assoc($feeds_res)) {
+    echo "<option value='{$feed['NameofFeeds']}' data-price='{$feed['Price']}'>
+            {$feed['NameofFeeds']} (Stock: {$feed['Quantity']})
+          </option>";
+  }
+  ?>
+</select>
+
+
+
 
       <label>Price:</label>
       <input id="expense-price" name="Price" class="input" type="number" min="0" step="0.01" required readonly />
@@ -88,14 +97,17 @@
     </div>
     <form method="POST" action="addharvest.php" id="harvest-form" class="modal-body">
       <label>Full Name:</label>
-     <select id="harvest-worker" name="Fisherman" class="select" required>
+    <select id="harvest-worker" name="Fisherman" class="select" required>
   <?php
   $res = mysqli_query($conn, "SELECT Fisherman, AmountofSimilia FROM tbl_workersdata");
   while ($row = mysqli_fetch_assoc($res)) {
-    echo "<option value='{$row['Fisherman']}' data-similia='{$row['AmountofSimilia']}'>{$row['Fisherman']}</option>";
+    echo "<option value='{$row['Fisherman']}' data-similia='{$row['AmountofSimilia']}'>
+            {$row['Fisherman']}
+          </option>";
   }
   ?>
 </select>
+
 
 
       </select>
@@ -149,6 +161,33 @@
   </div>
 </div>
 
+<!-- RECEIPT PREVIEW MODAL -->
+<div id="receipt-modal" class="modal">
+  <div class="modal-overlay" onclick="closeReceiptModal()"></div>
+
+  <div class="modal-content receipt-modal-content">
+    <div class="modal-header receipt-header">
+      <h3 id="receipt-title">Receipt</h3>
+      <button class="modal-close" onclick="closeReceiptModal()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="modal-body receipt-body" id="receipt-content">
+      <!-- Receipt details dynamically inserted here -->
+    </div>
+
+   <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px; padding:10px 20px; border-top:1px solid #d0d7e3; background:#f9fbff; border-radius:0 0 8px 8px;">
+  <button class="btn btn-primary" onclick="printReceipt()">🖨️ Print Receipt</button>
+  <button class="btn btn-secondary" onclick="closeReceiptModal()">✖ Close</button>
+</div>
+
+  </div>
+</div>
+
+
+
+
 <!-- Cancel helpers -->
 <script>
 function handleWorkerCancel(){document.getElementById("worker-form").reset();closeWorkerDialog();}
@@ -163,50 +202,50 @@ function closeTransactionDialog(){document.getElementById("transaction-dialog").
 
 
 document.addEventListener("DOMContentLoaded", function() {
+  const workerSelect = $("#harvest-worker");
+  const similiaInput = document.getElementById("harvest-similia");
   const kiloInput = document.getElementById("harvest-kilo");
   const priceInput = document.getElementById("harvest-price");
   const subtotalInput = document.getElementById("harvest-subtotal");
-  const similiaInput = document.getElementById("harvest-similia");
   const feedsInput = document.getElementById("harvest-feeds");
   const expensesInput = document.getElementById("harvest-expenses");
   const profitInput = document.getElementById("harvest-profit");
   const divProfitInput = document.getElementById("harvest-divprofit");
-  const workerSelect = document.getElementById("harvest-worker");
 
-  function updateSubtotal() {
+  // Initialize Select2 for Harvest
+  workerSelect.select2({
+    placeholder: "-- Select Fisherman --",
+    allowClear: true,
+    width: "100%"
+  });
+
+  // Auto-fill similia when worker changes
+  workerSelect.on("change", function() {
+    const selectedOption = $(this).find(":selected");
+    const similiaValue = parseFloat(selectedOption.data("similia")) || 0;
+    similiaInput.value = similiaValue.toFixed(2);
+    calculateTotals();
+  });
+
+  function calculateTotals() {
     const kilo = parseFloat(kiloInput.value) || 0;
     const price = parseFloat(priceInput.value) || 0;
-    subtotalInput.value = (kilo * price).toFixed(2);
-    updateCalculations();
-  }
-
-  function updateSimilia() {
-    const selectedOption = workerSelect.options[workerSelect.selectedIndex];
-    const similia = parseFloat(selectedOption.getAttribute("data-similia")) || 0;
-    similiaInput.value = similia.toFixed(2);
-    updateCalculations();
-  }
-
-  function updateCalculations() {
-    const similia = parseFloat(similiaInput.value) || 0;
     const feeds = parseFloat(feedsInput.value) || 0;
-    const subtotal = parseFloat(subtotalInput.value) || 0;
+    const similia = parseFloat(similiaInput.value) || 0;
 
-    const totalExpenses = similia + feeds;
-    expensesInput.value = totalExpenses.toFixed(2);
-
+    const subtotal = kilo * price;
+    const totalExpenses = feeds + similia;
     const profit = subtotal - totalExpenses;
-    profitInput.value = profit.toFixed(2);
+    const divProfit = profit / 2;
 
-    const dividedProfit = profit / 2;
-    divProfitInput.value = dividedProfit.toFixed(2);
+    subtotalInput.value = subtotal.toFixed(2);
+    expensesInput.value = totalExpenses.toFixed(2);
+    profitInput.value = profit.toFixed(2);
+    divProfitInput.value = divProfit.toFixed(2);
   }
 
-  // Event listeners
-  kiloInput.addEventListener("input", updateSubtotal);
-  priceInput.addEventListener("input", updateSubtotal);
-  feedsInput.addEventListener("input", updateCalculations);
-  workerSelect.addEventListener("change", updateSimilia);
+  // Update totals when numeric inputs change
+  $("#harvest-kilo, #harvest-price, #harvest-feeds").on("input", calculateTotals);
 });
 
 
@@ -238,6 +277,15 @@ function loadExpenses() {
       }
 
       document.getElementById("total-expenses-sum").textContent = "₱" + total.toFixed(2);
+
+      // 🪄 Save fisherman + total for Harvest autofill
+const fisherman = document.getElementById("expense-search").value.trim();
+if (fisherman !== "") {
+  localStorage.setItem("latestFisherman", fisherman);
+  localStorage.setItem("latestFeedsTotal", total.toFixed(2));
+  console.log("Saved total feeds:", fisherman, total.toFixed(2));
+}
+
     })
     .catch(err => {
       console.error("Error loading expenses:", err);
@@ -247,6 +295,28 @@ function loadExpenses() {
 // Auto-load all expenses when page first loads
 document.addEventListener("DOMContentLoaded", loadExpenses);
 
+function searchFisherman() {
+  const fisherman = document.getElementById("expense-search").value.trim();
+  if (fisherman === "") return alert("Please enter a fisherman name.");
+
+  fetch(`get_total_feeds.php?fisherman=${encodeURIComponent(fisherman)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("fisherman-total").innerText = 
+          `Total Feeds Amount for ${fisherman}: ₱${parseFloat(data.total).toFixed(2)}`;
+
+        // 🪄 Save it in localStorage for the Harvest autofill later
+        localStorage.setItem("latestFeedsTotal", data.total);
+        localStorage.setItem("latestFisherman", fisherman);
+      } else {
+        alert("No records found for that fisherman.");
+      }
+    })
+    .catch(err => console.error("Error fetching total feeds:", err));
+}
+
+
 
 function loadHarvests() {
   const searchValue = document.getElementById("harvest-search").value;
@@ -255,41 +325,168 @@ function loadHarvests() {
     .then(data => {
       const tableBody = document.querySelector("#harvests-table tbody");
       tableBody.innerHTML = "";
-      let totalProfit = 0;
+      let total = 0;
 
       if (data.length === 0) {
-        tableBody.innerHTML = "<tr><td colspan='10' style='text-align:center;'>No harvest records found.</td></tr>";
+        tableBody.innerHTML = "<tr><td colspan='10' style='text-align:center;'>No records found.</td></tr>";
       } else {
-        data.forEach(h => {
+        data.forEach(harvest => {
+          const pricePerKilo = parseFloat(harvest.Priceperkilo) || 0;
+          const kiloOfFish = parseFloat(harvest.KiloofFish) || 0;
+          const subtotal = parseFloat(harvest.Subtotal) || (pricePerKilo * kiloOfFish);
+          const totalExpense = parseFloat(harvest.TotalExpense) || 0;
+          const profit = parseFloat(harvest.Profit) || (subtotal - totalExpense);
+          const dividedProfit = parseFloat(harvest.Dividedprofit) || (profit / 2);
+
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${h.Fisherman}</td>
-            <td>${h.KiloofFish}</td>
-            <td>₱${parseFloat(h.PricePerkilo).toFixed(2)}</td>
-            <td>₱${parseFloat(h.Subtotal).toFixed(2)}</td>
-            <td>₱${parseFloat(h.AmountofSimilia).toFixed(2)}</td>
-            <td>₱${parseFloat(h.AmountofFeeds).toFixed(2)}</td>
-            <td>₱${parseFloat(h.TotalExpense).toFixed(2)}</td>
-            <td>₱${parseFloat(h.Profit).toFixed(2)}</td>
-            <td>₱${parseFloat(h.Dividedprofit).toFixed(2)}</td>
-            <td>${h.Date}</td>
+            <td>${harvest.Fisherman}</td>
+            <td>${kiloOfFish}</td>
+            <td>₱${pricePerKilo.toFixed(2)}</td>
+            <td>₱${subtotal.toFixed(2)}</td>
+            <td>₱${parseFloat(harvest.AmountofSimilia || 0).toFixed(2)}</td>
+            <td>₱${parseFloat(harvest.AmountofFeeds || 0).toFixed(2)}</td>
+            <td>₱${totalExpense.toFixed(2)}</td>
+            <td>₱${profit.toFixed(2)}</td>
+            <td>₱${dividedProfit.toFixed(2)}</td>
+            <td>${harvest.Date}</td>
           `;
           tableBody.appendChild(row);
-          totalProfit += parseFloat(h.Profit);
+          total += profit;
         });
       }
 
-      document.getElementById("total-profit-sum").textContent = "₱" + totalProfit.toFixed(2);
+      document.getElementById("total-profit-sum").textContent = "₱" + total.toFixed(2);
     })
     .catch(err => {
       console.error("Error loading harvests:", err);
     });
 }
 
+
 // Auto-load all harvests when page first loads
 document.addEventListener("DOMContentLoaded", loadHarvests);
 
 
+function loadTransactions() {
+  const searchValue = document.getElementById("transaction-search").value;
+  fetch(`fetch_transactions.php?search=${encodeURIComponent(searchValue)}`)
+    .then(res => res.json())
+    .then(data => {
+      const tableBody = document.querySelector("#transactions-table tbody");
+      tableBody.innerHTML = "";
+      let totalSum = 0;
+
+      if (data.length === 0) {
+        tableBody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No records found.</td></tr>";
+      } else {
+        data.forEach(tx => {
+          const row = document.createElement("tr");
+          const total = parseFloat(tx.Price) * parseFloat(tx.Quantity);
+          row.innerHTML = `
+            <td>${tx.NameofFeeds}</td>
+            <td>₱${parseFloat(tx.Price).toFixed(2)}</td>
+            <td>${tx.Quantity}</td>
+            <td>₱${total.toFixed(2)}</td>
+            <td>${tx.Date}</td>
+          `;
+          tableBody.appendChild(row);
+          totalSum += total;
+        });
+      }
+
+      document.getElementById("total-stock-sum").textContent = "₱" + totalSum.toFixed(2);
+    })
+    .catch(err => {
+      console.error("Error loading transactions:", err);
+    });
+}
+
+// Auto-load all feedstocks when page loads
+document.addEventListener("DOMContentLoaded", loadTransactions);
+
+
+$(document).ready(function() {
+  // Initialize searchable + clearable dropdown for both modals
+  $('#expense-worker, #harvest-worker').select2({
+    placeholder: "Select a Fisherman",
+    allowClear: true,
+    width: '100%'
+  });
+
+  // Also make Type of Feeds searchable
+  $('#expense-category').select2({
+    placeholder: "Select Feed",
+    allowClear: true,
+    width: '100%'
+  });
+});
+
+
+document.getElementById("expense-category").addEventListener("change", function() {
+  const selected = this.options[this.selectedIndex];
+  const stock = parseFloat(selected.getAttribute("data-stock")) || 0;
+  const price = parseFloat(selected.getAttribute("data-price")) || 0;
+
+  document.getElementById("expense-price").value = price.toFixed(2);
+
+  if (stock <= 0) {
+    alert("This feed is out of stock and cannot be selected!");
+    this.value = "";
+    document.getElementById("expense-price").value = "";
+  }
+});
+
+document.getElementById("harvest-worker").addEventListener("change", function() {
+  const selected = this.value;
+  const savedFisherman = localStorage.getItem("latestFisherman");
+  const savedTotal = localStorage.getItem("latestFeedsTotal");
+
+  if (selected === savedFisherman && savedTotal) {
+    document.getElementById("harvest-feeds").value = parseFloat(savedTotal).toFixed(2);
+  }
+});
+
+
+document.addEventListener("DOMContentLoaded", function() {
+  const harvestWorker = document.getElementById("harvest-worker");
+  const harvestFeeds = document.getElementById("harvest-feeds");
+
+  if (harvestWorker && harvestFeeds) {
+    harvestWorker.addEventListener("change", function() {
+      const selectedFisherman = this.value;
+      const savedFisherman = localStorage.getItem("latestFisherman");
+      const savedTotal = localStorage.getItem("latestFeedsTotal");
+
+      console.log("Selected:", selectedFisherman);
+      console.log("Saved:", savedFisherman, savedTotal);
+
+      if (selectedFisherman === savedFisherman && savedTotal) {
+        harvestFeeds.value = parseFloat(savedTotal).toFixed(2);
+      }
+    });
+  }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+  const harvestWorker = document.getElementById("harvest-worker");
+  const harvestFeeds = document.getElementById("harvest-feeds");
+
+  if (harvestWorker && harvestFeeds) {
+    harvestWorker.addEventListener("change", function() {
+      const selectedFisherman = this.value.trim();
+      const savedFisherman = localStorage.getItem("latestFisherman");
+      const savedTotal = localStorage.getItem("latestFeedsTotal");
+
+      console.log("Selected:", selectedFisherman);
+      console.log("Saved:", savedFisherman, savedTotal);
+
+      if (selectedFisherman === savedFisherman && savedTotal) {
+        harvestFeeds.value = parseFloat(savedTotal).toFixed(2);
+      }
+    });
+  }
+});
 
 
 </script>
