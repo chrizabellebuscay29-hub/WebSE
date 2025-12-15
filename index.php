@@ -1,6 +1,4 @@
-<?php
-include("connection.php");
-?>
+<?php include("connection.php"); ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -8,210 +6,474 @@ include("connection.php");
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fishing Operation Manager</title>
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Existing local stylesheet (kept for overrides if present) -->
   <link rel="stylesheet" href="style.css">
 
-<!-- Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-<!-- jQuery + Select2 JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+  <!-- jQuery + Select2 JS (kept as before) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
   <style>
+    /* ---------- Base ---------- */
+    :root{
+      --primary:#1f6feb;
+      --accent:#2E549C;
+      --muted:#6b7280;
+      --card:#ffffff;
+      --bg:#f4f8fb;
+      --glass: rgba(255,255,255,0.6);
+      --sea-1: #c7f0ff;
+      --sea-2: #e6f7ff;
+      --success: #14b8a6;
+      --danger: #ef4444;
+      --shadow: 0 8px 30px rgba(16,24,40,0.08);
+      font-synthesis: none;
+    }
 
-/* Match size + style of your .input fields */
-.select2-container {
-  width: 100% !important;
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background-image: url ("fisherman-1559753_1280.jpg");
+      color: #082E76;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+    }
+
+    /* subtle fish scale pattern (CSS-generated) */
+    body::before{
+      content:'';
+      position:fixed;
+      inset:0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.6) 0 2px, transparent 3px),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.5) 0 1.5px, transparent 2.5px);
+      opacity:0.18;
+      pointer-events:none;
+      z-index:0;
+      mix-blend-mode:overlay;
+    }
+
+    .container{
+      max-width:1180px;
+      margin:0 auto;
+      padding:22px;
+      position:relative;
+      z-index:2;
+    }
+
+    /* ---------- Header ---------- */
+    .header{
+      padding:18px 0;
+      background: linear-gradient(90deg, rgba(47,116,233,0.12), rgba(46,84,156,0.06));
+      border-radius: 12px;
+      margin-bottom:14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    .header-bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .header-content{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .header-icon{
+      font-size:28px;
+      color:var(--primary);
+      background: linear-gradient(135deg,#eaf5ff, #e6f0ff);
+      padding:10px;
+      border-radius:10px;
+      box-shadow: 0 6px 18px rgba(32,77,160,0.06), inset 0 -4px 12px rgba(255,255,255,0.5);
+    }
+
+    .header h1{
+      margin:0;
+      font-size:1.25rem;
+      letter-spacing: -0.2px;
+      color: #082E76;
+      font-weight:700;
+    }
+
+    .header-subtitle{
+      margin:0;
+      font-size:0.875rem;
+      color:var(--muted);
+    }
+
+    .header-actions .logout-btn{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      background:transparent;
+      border:1px solid rgba(46,84,156,0.08);
+      padding:9px 12px;
+      border-radius:10px;
+      color:var(--accent);
+      font-weight:600;
+      cursor:pointer;
+      transition:all .18s ease;
+      box-shadow: none;
+    }
+    .header-actions .logout-btn:hover{
+      transform:translateY(-3px);
+      box-shadow:0 8px 24px rgba(30,84,167,0.08);
+      background: linear-gradient(180deg, rgba(47,116,233,0.06), rgba(46,84,156,0.02));
+    }
+
+    /* ---------- Nav Tabs ---------- */
+    .nav{
+      margin:16px 0 26px 0;
+      padding:0;
+    }
+
+    .nav-tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .nav-tab{
+      border: none;
+      background: transparent;
+      color:var(--muted);
+      padding:10px 14px;
+      border-radius:12px;
+      font-weight:600;
+      cursor:pointer;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      transition: all .18s ease;
+      border:1px solid transparent;
+    }
+
+   /* Default icon – visible */
+.nav-tab .nav-icon{
+  color: var(--primary);          /* strong base color */
+  opacity: 1;                    /* no fading */
+  transition: color 0.25s ease;
 }
 
-.select2-container--default .select2-selection--single {
-  height: 40px !important;
-  border: 2px solid #4f7fe9 !important;
-  border-radius: 6px !important;
-  padding: 4px 8px !important;
-  font-size: 0.875rem !important;
-  display: flex !important;
-  align-items: center !important;
+/* Hover state */
+.nav-tab:hover{
+  background: rgba(47,116,233,0.06);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(30,84,167,0.05);
 }
 
-.select2-container--default .select2-selection--single:focus,
-.select2-container--default.select2-container--focus .select2-selection--single {
-  outline: none !important;
-  border-color: #4f7fe9 !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+/* Icon on hover – high contrast */
+.nav-tab:hover .nav-icon{
+  color: var(--accent);          /* visible on hover bg */
 }
 
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-  height: 100% !important;
-  right: 10px !important;
-}
-
-/* X (clear) button alignment */
-.select2-container--default .select2-selection--single .select2-selection__clear {
-  position: absolute;
-  right: 32px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.1rem;
-  color: #515760;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  z-index: 10;
-}
-.select2-container--default .select2-selection--single .select2-selection__clear:hover {
-  color: #e11522;
-}
-
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-  color: #0f172a !important;
-  line-height: 32px !important;
-  padding-right: 2rem !important;
-}
-
-.select2-dropdown {
-  border: 2px solid #4f7fe9 !important;
-  border-radius: 6px !important;
+/* Clicked / active tab */
+.nav-tab:active .nav-icon,
+.nav-tab.active .nav-icon{
+  color: var(--accent);
 }
 
 
-.harvest-records table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-.harvest-records th, .harvest-records td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
-}
-.harvest-records th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-}
+    /* ---------- Main Layout ---------- */
+    .main{
+      padding-bottom:40px;
+    }
 
-.workers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
+    .page-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+    }
 
-/* Worker Card Base */
-.worker-card-header {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-}
+    .page-header h2{
+      margin:0;
+      font-size:1.1rem;
+      color:#082E76;
+      font-weight:700;
+    }
 
-/* Add space between header icons and the rest of the card */
-.worker-card {
-  position: relative;
-  background-color: rgb(194, 227, 249);
-  border: 1px solid rgba(149, 171, 185, 1);
-  border-radius: 8px;
-  padding: 18px 12px 12px 12px; /* extra padding for top icons */
-  text-align: left;
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
-}
+    .page-subtitle{
+      margin:0;
+      font-size:0.9rem;
+      color:var(--muted);
+    }
 
-.worker-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0, 102, 254, 0.25);
-}
-.worker-card-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-}
+    .page-actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
 
-/* top-left (Edit button) */
-.worker-card-header-left {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-}
+    .btn{
+      border: none;
+      border-radius:10px;
+      padding:9px 14px;
+      font-weight:700;
+      cursor:pointer;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+    }
 
-/* top-right (Delete button) */
+    .btn-primary{
+      background: linear-gradient(90deg,var(--primary), var(--accent));
+      color:white;
+      box-shadow: 0 10px 26px rgba(46,84,156,0.12);
+    }
+
+    .btn-outline{
+      background:transparent;
+      border: 1px solid rgba(46,84,156,0.12);
+      color:var(--accent);
+    }
+
+    .btn:hover{ transform: translateY(-3px); }
+
+    /* ---------- Dashboard Cards ---------- */
+    .stats-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px,1fr));
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), var(--card));
+      border-radius:12px;
+      padding:14px 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(46,84,156,0.06);
+      transition: transform .18s ease, box-shadow .18s ease;
+      overflow:hidden;
+    }
+
+    .card:hover{
+      transform: translateY(-6px);
+      box-shadow: 0 18px 45px rgba(16,24,40,0.08);
+    }
+
+    .card-header-inline{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
+
+    .card-title-sm{
+      font-size:0.9rem;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .card-body{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-top:10px;
+    }
+
+    .stat-value{
+      font-size:1.35rem;
+      font-weight:800;
+      color:#082E76;
+    }
+
+    .stat-value-success{
+      color:var(--success);
+    }
+
+    .stat-label{
+      margin:0;
+      font-size:0.85rem;
+      color:var(--muted);
+    }
+
+    /* ---------- Workers Grid & Cards ---------- */
+    .workers-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap:18px;
+      margin-top:10px;
+    }
+
+   .worker-card {
+    position:relative;
+    background: linear-gradient(180deg, #ffffff, rgba(236,249,255,0.8));
+    border-radius:12px;
+    padding:14px 14px 18px 14px; /* Add bottom padding if wanted */
+    text-align:left;
+    transition: transform .18s ease, box-shadow .18s ease;
+    border: 1px solid rgba(46,84,156,0.06);
+    overflow:clip;
+    /* ADD THIS LINE: */
+    padding-top: 48px; /* Ensures the header buttons won't cover name/image */
+}
+.worker-card-header-left,
 .worker-card-header-right {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+    position:absolute;
+    top:10px;
+    z-index:5;
 }
+.worker-card-header-left { left:10px; }
+.worker-card-header-right { right:10px; }
 
-.worker-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.1rem;
-  color: #4f7fe9;
-  transition: color 0.2s ease, transform 0.15s ease;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    .worker-card:hover{
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(16,24,40,0.08);
+    }
 
-.worker-btn:hover {
-  transform: scale(1.15);
-}
+   
 
-.edit-btn:hover {
-  color: #2E549C;
-}
+    .worker-btn{
+      background: rgba(255,255,255,0.9);
+      border-radius:8px;
+      border:1px solid rgba(46,84,156,0.06);
+      padding:6px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+    }
 
-.delete-btn:hover {
-  color: #E11522;
-}
+    .worker-image{
+      width:100%;
+      height:160px;
+      object-fit:cover;
+      border-radius:8px;
+      display:block;
+      margin-top:18px;
+      box-shadow: 0 8px 24px rgba(46,84,156,0.06);
+    }
 
-/* image styling */
-.worker-image {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 6px;
-  margin-bottom: 10px;
-  margin-top: 5px;
-}
+    .worker-name{
+      font-size:1rem;
+      margin:10px 0 6px;
+      color:var(--accent);
+      font-weight:700;
+    }
 
-/* name above picture */
-.worker-name {
-  font-size: 1.05rem;
-  color: #082E76;
-  margin-top: 26px; /* ⬅ added top margin */
-  margin-bottom: 6px;
-}
+    .worker-info p{
+      margin:4px 0;
+      color:#15345a;
+      font-size:0.88rem;
+    }
 
-.worker-card button {
-  margin: 5px 2px;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
+    /* ---------- Tables ---------- */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      background:white;
+      border-radius:10px;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+    }
 
-/* Hoverable effect for the dashboard stat "slabs" inside .stats-grid */
-.stats-grid .card {
-    cursor: pointer;
-}
-.worker.card .card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 30px rgba(0, 102, 254, 0.574);
-}
-.worker.card .card:active {
-    transform: translateY(-2px);
-}
+    thead th{
+      background: linear-gradient(90deg,var(--accent), var(--primary));
+      color:white;
+      font-weight:700;
+      padding:12px;
+      border:none;
+      text-align:center;
+      font-size:0.92rem;
+    }
 
-.expense-search{
-  display: inline-block;
-}
+    tbody td{
+      padding:10px 12px;
+      color:#0f172a;
+      border-bottom:1px solid rgba(15,23,42,0.04);
+      text-align:center;
+      font-size:0.92rem;
+    }
 
+    tbody tr:nth-child(even){ background: rgba(47,116,233,0.02); }
 
-</style>
+    tfoot td{
+      padding:10px;
+      background: #f8fbff;
+      font-weight:700;
+      color:var(--muted);
+      text-align:center;
+    }
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    /* Inputs */
+    .input{
+      border-radius:10px;
+      border:1px solid rgba(46,84,156,0.08);
+      padding:9px 12px;
+      background:white;
+      font-size:0.95rem;
+      color:#0f172a;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+
+    .form-group label{ font-weight:700; color:var(--accent); display:block; margin-bottom:6px; }
+
+    /* Pagination area */
+    #expense-pagination, #harvests-pagination, #transaction-pagination{
+      margin-top:14px;
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      align-items:center;
+    }
+
+    /* Receipts & modal adjustments remain unobtrusive */
+    #receipt-modal .active, .modal.active { display:block !important; }
+
+    /* Select2 integration tweaks (kept and improved) */
+    .select2-container { width:100% !important; }
+    .select2-container--default .select2-selection--single {
+      height:44px !important;
+      border:1px solid rgba(46,84,156,0.12) !important;
+      border-radius:10px !important;
+      padding:6px 10px !important;
+      font-size:0.95rem !important;
+      display:flex !important;
+      align-items:center !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__clear { right:42px; }
+    .select2-dropdown { border-radius:8px; border:1px solid rgba(46,84,156,0.08) !important; }
+
+    /* Responsive tweaks */
+    @media (max-width:880px){
+      .header h1 { font-size:1rem; }
+      .stats-grid{ grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); }
+      .workers-grid{ grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); }
+    }
+    @media (max-width:520px){
+      .header-bar{ flex-direction:column; align-items:flex-start; gap:12px; }
+      .page-header{ flex-direction:column; align-items:flex-start; gap:12px; }
+      .nav-tabs{ overflow:auto; padding-bottom:6px; -webkit-overflow-scrolling:touch; }
+      .nav-tab{ white-space:nowrap; }
+    }
+
+    /* Small utilities */
+    .empty-state{ color:var(--muted); padding:12px; text-align:center; }
+    .expense-search { display:inline-block; }
+
+  </style>
 </head>
 
 <body>
@@ -276,23 +538,20 @@ include("connection.php");
 
     <!-- Workers -->
     <div id="workers" class="tab-content"> 
-  <div class="page-header">
-    <div>
-      <h2>Workers Management</h2>
-      <p class="page-subtitle">Manage your fishing crew members</p>
+      <div class="page-header">
+        <div>
+          <h2>Workers Management</h2>
+          <p class="page-subtitle">Manage your fishing crew members</p>
+        </div>
+
+        <button class="btn btn-primary" onclick="openWorkerDialog()">
+          <i class="fa-solid fa-plus"></i> Add Worker
+        </button>
+      </div>
+
+      <!-- Workers Grid -->
+      <div id="workers-list" class="workers-grid"></div>
     </div>
-
-    <button class="btn btn-primary" onclick="openWorkerDialog()">
-      <i class="fa-solid fa-plus"></i> Add Worker
-    </button>
-  </div>
-
-  <!-- Workers Grid -->
-  <div id="workers-list" class="workers-grid"></div>
-</div>
-
-
-
 
     <!-- Expenses -->
     <div id="expenses" class="tab-content">
@@ -302,70 +561,63 @@ include("connection.php");
           <p class="page-subtitle">Track transaction expenses per worker</p>
         </div>
 
-<div class="page-actions">
-  <button class="btn btn-outline" onclick="printAllExpenses()">
-    <i class="fa-solid fa-print"></i> Print All
-  </button>
+        <div class="page-actions">
+          <button class="btn btn-outline" onclick="printAllExpenses()">
+            <i class="fa-solid fa-print"></i> Print All
+          </button>
 
-  <button class="btn btn-primary" onclick="openExpenseDialog()">
-    <i class="fa-solid fa-plus"></i> Add Expense
-  </button>
-</div>
-
-
+          <button class="btn btn-primary" onclick="openExpenseDialog()">
+            <i class="fa-solid fa-plus"></i> Add Expense
+          </button>
+        </div>
       </div>
+
       <div id="expenses-list">
-                   <!-- Search bar -->
-<div style="margin-bottom: 15px;">
-  <input type="text" id="expense-search" placeholder="Search Fisherman..." class="input" style="width: 300px; padding: 8px;">
-  <button class="btn btn-primary" onclick="loadExpenses()">Search</button>
-</div>
+        <!-- Search bar -->
+        <div style="margin-bottom: 15px;">
+          <input type="text" id="expense-search" placeholder="Search Fisherman..." class="input" style="width: 300px; padding: 8px;">
+          <button class="btn btn-primary" onclick="loadExpenses()">Search</button>
+        </div>
 
-<div class="form-group" style="margin-top:10px;">
-  <label style="font-weight:600; color:#082E76;">
-    Total Expenses
-  </label>
-  <input
-    type="text"
-    id="expense-total"
-    class="input"
-    readonly
-    value="₱0.00"
-    style="
-      background:#f8fafc;
-      font-weight:600;
-      color:#082E76;
-    "
-  >
-</div>
-
-
+        <div class="form-group" style="margin-top:10px;">
+          <label style="font-weight:600; color:#082E76;">
+            Total Expenses
+          </label>
+          <input
+            type="text"
+            id="expense-total"
+            class="input"
+            readonly
+            value="₱0.00"
+            style="
+              background:#f8fafc;
+              font-weight:600;
+              color:#082E76;
+            "
+          >
+        </div>
 
         <!-- Expenses Table -->
-<table id="expenses-table" border="1" cellpadding="8" cellspacing="0" style="width:100%; background:white; border-collapse: collapse;">
-  <thead style="background:#4f7fe9; color:white;">
-    <tr>
-      <th>Fisherman</th>
-      <th>Type of Feeds</th>
-      <th>Price</th>
-      <th>Quantity</th>
-      <th>Total Amount</th>
-      <th>Date</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-  <tfoot>
-    <tr style="background:#e9f0ff;">
-      
-      
-      <td></td>
-    </tr>
-  </tfoot>
-</table>
+        <table id="expenses-table" border="0" cellpadding="8" cellspacing="0" style="width:100%;">
+          <thead>
+            <tr>
+              <th>Fisherman</th>
+              <th>Type of Feeds</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Total Amount</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+          </tfoot>
+        </table>
 
-<div id="expense-pagination" style="text-align:center; margin-top:15px;"></div>
-
-
+        <div id="expense-pagination" style="text-align:center; margin-top:15px;"></div>
       </div>
     </div>
 
@@ -377,49 +629,43 @@ include("connection.php");
           <p class="page-subtitle">Calculate harvest profits</p>
         </div>
         <div class="page-actions">
-  <button class="btn btn-outline" onclick="printAllHarvests()">
-    <i class="fa-solid fa-print"></i> Print All
-  </button>
-  <button class="btn btn-primary" onclick="openHarvestDialog()">
-    <i class="fa-solid fa-plus"></i> Add Harvest
-  </button>
-</div>
+          <button class="btn btn-outline" onclick="printAllHarvests()">
+            <i class="fa-solid fa-print"></i> Print All
+          </button>
+          <button class="btn btn-primary" onclick="openHarvestDialog()">
+            <i class="fa-solid fa-plus"></i> Add Harvest
+          </button>
+        </div>
       </div>
       <div id="harvests-list">
         <!-- Search bar -->
-<div style="margin-bottom: 15px;">
-  <input type="text" id="harvest-search" placeholder="Search Fisherman..." class="input" style="width: 300px; padding: 8px;">
-  <button class="btn btn-primary" onclick="loadHarvests()">Search</button>
-</div>
+        <div style="margin-bottom: 15px;">
+          <input type="text" id="harvest-search" placeholder="Search Fisherman..." class="input" style="width: 300px; padding: 8px;">
+          <button class="btn btn-primary" onclick="loadHarvests()">Search</button>
+        </div>
 
-<!-- Harvests Table -->
-<table id="harvests-table" border="1" cellpadding="8" cellspacing="0" style="width:100%; background:white; border-collapse: collapse;">
-  <thead style="background:#4f7fe9; color:white;">
-    <tr>
-      <th>Fisherman</th>
-      <th>Kilo of Fish</th>
-      <th>Price/Kilo</th>
-      <th>Subtotal</th>
-      <th>Similia</th>
-      <th>Feeds</th>
-      <th>Total Expenses</th>
-      <th>Profit</th>
-      <th>Divided Profit</th>
-      <th>Date</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-  <tfoot>
-    <tr style="background:#e9f0ff;">
-      
-     
-    </tr>
-  </tfoot>
-</table>
-<div id="harvests-pagination"></div>
-
-
-
+        <!-- Harvests Table -->
+        <table id="harvests-table" border="0" cellpadding="8" cellspacing="0" style="width:100%;">
+          <thead>
+            <tr>
+              <th>Fisherman</th>
+              <th>Kilo of Fish</th>
+              <th>Price/Kilo</th>
+              <th>Subtotal</th>
+              <th>Similia</th>
+              <th>Feeds</th>
+              <th>Total Expenses</th>
+              <th>Profit</th>
+              <th>Divided Profit</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr></tr>
+          </tfoot>
+        </table>
+        <div id="harvests-pagination"></div>
       </div>
     </div>
 
@@ -431,48 +677,51 @@ include("connection.php");
           <p class="page-subtitle">Record feeds availability or stocks</p>
         </div>
         <div class="page-actions">
-  <button class="btn btn-outline" onclick="printTransactions()">
-    <i class="fa-solid fa-print"></i> Print All
-  </button>
-  <button class="btn btn-primary" onclick="openTransactionDialog()">
-    <i class="fa-solid fa-plus"></i> Add Transaction
-  </button>
-</div>
+          <button class="btn btn-outline" onclick="printTransactions()">
+            <i class="fa-solid fa-print"></i> Print All
+          </button>
+          <button class="btn btn-primary" onclick="openTransactionDialog()">
+            <i class="fa-solid fa-plus"></i> Add Transaction
+          </button>
+        </div>
       </div>
-      
+
       <div id="transactions-list">
         <!-- Search Bar -->
-<div style="margin-bottom: 15px;">
-  <input type="text" id="transaction-search" placeholder="Search Feed Name..." class="input" style="width: 300px; padding: 8px;">
-  <button class="btn btn-primary" onclick="loadTransactions()">Search</button>
-</div>
+        <div style="margin-bottom: 15px;">
+          <input type="text" id="transaction-search" placeholder="Search Feed Name..." class="input" style="width: 300px; padding: 8px;">
+          <button class="btn btn-primary" onclick="loadTransactions()">Search</button>
+        </div>
 
-<!-- Feedstocks Table -->
-<table id="transactions-table" border="1" cellpadding="8" cellspacing="0" style="width:100%; background:white; border-collapse: collapse;">
-  <thead style="background:#4f7fe9; color:white;">
-    <tr>
-      <th>Name of Feeds</th>
-      <th>Price per Piece</th>
-      <th>Quantity</th>
-      <th>Total Amount</th>
-      <th>Date</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-  <tfoot>
-    <tr style="background:#e9f0ff;">
-      
-    </tr>
-  </tfoot>
-</table>
-<div id="transaction-pagination"></div>
-
+        <!-- Feedstocks Table -->
+        <table id="transactions-table" border="0" cellpadding="8" cellspacing="0" style="width:100%;">
+          <thead>
+            <tr>
+              <th>Name of Feeds</th>
+              <th>Price per Piece</th>
+              <th>Quantity</th>
+              <th>Total Amount</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr></tr>
+          </tfoot>
+        </table>
+        <div id="transaction-pagination"></div>
       </div>
     </div>
   </main>
 
   <!-- ============= MODALS ============= -->
   <?php include("modals.php"); ?>
+
+  <!-- =========================
+       Existing scripts preserved (no functional changes).
+       All original JS is retained below exactly as provided earlier.
+       Only cosmetic/style changes were applied above.
+       ========================= -->
 
   <script>
   // Logout
