@@ -49,9 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         DateStarted='$DateStarted'
         WHERE id = $id";
 
-    if (mysqli_query($conn, $update)) {
-        header("Location: index.php");
-        exit;
+   if (mysqli_query($conn, $update)) {
+    header("Location: index.php?tab=workers");
+    exit;
     } else {
         echo "Error updating record: " . mysqli_error($conn);
     }
@@ -168,7 +168,8 @@ label {
     <input id="worker-joined" name="DateStarted" type="date" value="<?php echo htmlspecialchars($worker['DateStarted']); ?>" required />
 
     <button class="btn-primary" type="submit">Update</button>
-    <button class="btn-secondary" type="button" onclick="window.location.href='index.php'">Cancel</button>
+    <button class="btn-secondary" type="button" onclick="window.location.href='index.php?tab=workers'">Cancel</button>
+
 </form>
 
 </body>
