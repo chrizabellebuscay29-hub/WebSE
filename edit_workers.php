@@ -64,29 +64,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Update Worker</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f3f4f6;
-            margin: 0;
-            padding: 40px;
-        }
-        form {
-            max-width: 400px;
-            background: #fff;
-            padding: 20px 25px;
-            border-radius: 8px;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
-            margin: auto;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            font-weight: bold;
-            margin-top: 10px;
-        }
+       body {
+    font-family: Arial, sans-serif;
+    background-image: url("bg/fisherman-1559753_1280.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 40px;
+}
+
+      form {
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.85); /* subtle glass effect */
+    backdrop-filter: blur(5px) saturate(120%);
+    -webkit-backdrop-filter: blur(5px) saturate(120%);
+    padding: 20px 25px;
+    border-radius: 12px;
+    border: 1px solid rgba(200, 200, 200, 0.3); /* soft border */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    margin: auto;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+form:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
+}
+
+       h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* same as modal */
+    color: #082E76; /* modal heading color */
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-top: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* same as modal */
+    color: #0d1a52; /* modal label color */
+    font-size: 0.95rem;
+}
+
         input {
             width: 100%;
             padding: 8px;
