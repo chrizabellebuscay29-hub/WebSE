@@ -24,7 +24,7 @@
       
       <div class="modal-actions">
   <button class="btn btn-primary" type="submit">Save Worker</button>
-  <button type="button" class="btn btn-secondary" onclick="handleWorkerCancel()">Cancel</button>
+  <button type="button" class="btn btn-secondary" onclick="closeWorkerDialog()">Cancel</button>
 </div>
     </form>
   </div>
@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", function() {
   $("#harvest-kilo, #harvest-price, #harvest-feeds").on("input", calculateTotals);
 });
 
-
+//load expenses 
 let currentExpensePage = 1; // Track current page globally
 
 function loadExpenses(page = 1) {
@@ -479,8 +479,11 @@ function loadTransactions(page = 1) {
           `;
           tableBody.appendChild(tr);
           total += totalAmount;
+          
         });
+        
       }
+      
 
     
 
@@ -632,3 +635,195 @@ function formatNumberInput(input) {
 
 
 </script>
+<style>
+  /* ================= MODAL BASE ================= */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: all 0.3s ease-in-out;
+}
+
+.modal.active {
+  display: block;
+}
+
+/* ================= OVERLAY ================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+/* ================= MODAL CONTENT ================= */
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 90%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.85); /* subtle glass effect */
+  backdrop-filter: blur(5px) saturate(120%); /* light blur */
+  -webkit-backdrop-filter: blur(5px) saturate(120%);
+  border: 1px solid rgba(200, 200, 200, 0.3); /* soft border */
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* softer shadow */
+  transform: translate(-50%, -50%) scale(0.95);
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.modal.active .modal-content {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+
+/* ================= MODAL HEADER ================= */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.modal-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.1);
+}
+
+/* ================= MODAL BODY ================= */
+.modal-body {
+  padding: 20px 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-body label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #082E76;
+}
+
+.modal-body input,
+.modal-body select {
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 46, 118, 0.2);
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.25);
+  color: #082E76;
+  transition: all 0.2s ease;
+}
+
+.modal-body input:focus,
+.modal-body select:focus {
+  border-color: #1e90ff;
+  box-shadow: 0 0 6px rgba(30, 144, 255, 0.4);
+}
+
+/* ================= MODAL ACTIONS ================= */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.btn {
+  padding: 10px 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg,var(--primary), var(--accent));
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.45);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.25);
+  color: #082E76;
+  border: 1px solid rgba(8, 46, 118, 0.4);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+/* ================= RECEIPT MODAL ================= */
+.receipt-modal-content {
+  max-width: 500px;
+  background: linear-gradient(135deg, rgba(30, 60, 72, 0.9), rgba(42, 82, 152, 0.9));
+  color: #fff;
+}
+
+.receipt-header {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.receipt-body {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px 20px;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 0 0 15px 15px;
+}
+
+/* ================= ANIMATION ================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ================= SCROLLBAR FOR RECEIPT ================= */
+.receipt-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.receipt-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.receipt-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+</style>
