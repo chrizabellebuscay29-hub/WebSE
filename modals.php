@@ -788,12 +788,12 @@ function formatNumberInput(input) {
 /* ================= RECEIPT MODAL ================= */
 .receipt-modal-content {
   max-width: 500px;
-  background: linear-gradient(135deg, rgba(30, 60, 72, 0.9), rgba(42, 82, 152, 0.9));
+  background: white;
   color: #fff;
 }
 
 .receipt-header {
-  background: rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
   color: #fff;
 }
 
