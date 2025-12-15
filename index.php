@@ -302,9 +302,10 @@ include("connection.php");
           <p class="page-subtitle">Track transaction expenses per worker</p>
         </div>
 
- <button class="btn btn-outline" onclick="printExpenses()">
+<button class="btn btn-outline" onclick="printAllExpenses()">
   <i class="fa-solid fa-print"></i> Print All
 </button>
+
 
 
         <button class="btn btn-primary" onclick="openExpenseDialog()"><i class="fa-solid fa-plus"></i> Add Expense</button>
@@ -315,6 +316,26 @@ include("connection.php");
   <input type="text" id="expense-search" placeholder="Search Fisherman..." class="input" style="width: 300px; padding: 8px;">
   <button class="btn btn-primary" onclick="loadExpenses()">Search</button>
 </div>
+
+<div class="form-group" style="margin-top:10px;">
+  <label style="font-weight:600; color:#082E76;">
+    Total Expenses
+  </label>
+  <input
+    type="text"
+    id="expense-total"
+    class="input"
+    readonly
+    value="₱0.00"
+    style="
+      background:#f8fafc;
+      font-weight:600;
+      color:#082E76;
+    "
+  >
+</div>
+
+
 
         <!-- Expenses Table -->
 <table id="expenses-table" border="1" cellpadding="8" cellspacing="0" style="width:100%; background:white; border-collapse: collapse;">
@@ -331,12 +352,15 @@ include("connection.php");
   <tbody></tbody>
   <tfoot>
     <tr style="background:#e9f0ff;">
-      <td colspan="4" style="text-align:right; font-weight:bold;">Total:</td>
-      <td id="total-expenses-sum" style="font-weight:bold;">₱0.00</td>
+      
+      
       <td></td>
     </tr>
   </tfoot>
 </table>
+
+<div id="expense-pagination" style="text-align:center; margin-top:15px;"></div>
+
 
       </div>
     </div>
@@ -348,9 +372,10 @@ include("connection.php");
           <h2>Harvest Records</h2>
           <p class="page-subtitle">Calculate harvest profits</p>
         </div>
-        <button class="btn btn-outline" onclick="printHarvests()">
+        <button class="btn btn-outline" onclick="printAllHarvests()">
   <i class="fa-solid fa-print"></i> Print All
 </button>
+
 
         <button class="btn btn-primary" onclick="openHarvestDialog()"><i class="fa-solid fa-plus"></i> Add Harvest</button>
       </div>
@@ -380,12 +405,14 @@ include("connection.php");
   <tbody></tbody>
   <tfoot>
     <tr style="background:#e9f0ff;">
-      <td colspan="7" style="text-align:right; font-weight:bold;">Total Profit:</td>
-      <td id="total-profit-sum" style="font-weight:bold;">₱0.00</td>
-      <td colspan="2"></td>
+      
+     
     </tr>
   </tfoot>
 </table>
+<div id="harvests-pagination"></div>
+
+
 
       </div>
     </div>
@@ -425,12 +452,11 @@ include("connection.php");
   <tbody></tbody>
   <tfoot>
     <tr style="background:#e9f0ff;">
-      <td colspan="3" style="text-align:right; font-weight:bold;">Total Stock Value:</td>
-      <td id="total-stock-sum" style="font-weight:bold;">₱0.00</td>
-      <td></td>
+      
     </tr>
   </tfoot>
 </table>
+<div id="transaction-pagination"></div>
 
       </div>
     </div>
@@ -768,6 +794,7 @@ function refreshFeedsData() {
         closeExpenseDialog();
         expenseForm.reset();
         loadExpenses();       // refresh expense table
+        updateExpenseTotal();
         refreshFeedsData();   // update dropdown and stock table
       } else {
         alert("❌ " + data.message);
@@ -777,6 +804,13 @@ function refreshFeedsData() {
       console.error("Fetch Error:", err);
       alert("Error: Could not connect to server.");
     });
+  });
+});
+
+
+document.getElementById("harvest-form").addEventListener("submit", function () {
+  this.querySelectorAll("input[type='text']").forEach(input => {
+    input.value = input.value.replace(/,/g, '');
   });
 });
 
@@ -844,154 +878,174 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 // --- Print All Expenses ---
-function printExpenses() {
-  const table = document.getElementById('expenses-table').outerHTML;
-  const win = window.open('', '', 'width=900,height=700');
-  win.document.write(`
-    <html>
-      <head>
-        <title>All Expenses Records</title>
-        <style>
-          body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: #F3F9FF;
-            color: #082E76;
-            margin: 40px;
-          }
-          .report-container {
-            background: white;
-            border: 3px solid #2E549C;
-            border-radius: 12px;
-            padding: 25px 35px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
-          }
-          h2 {
-            text-align: center;
-            color: #082E76;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #2E549C;
-            padding-bottom: 8px;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-          }
-          th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-          }
-          th {
-            background-color: #2E549C;
-            color: white;
-          }
-          tfoot td {
-            background: #F3F9FF;
-            font-weight: bold;
-          }
-          .footer {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #515760;
-            margin-top: 25px;
-          }
-          @media print {
-            .footer { display: none; }
-            body { background: white; margin: 0; }
-            .report-container { border: none; box-shadow: none; padding: 0; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="report-container">
-          <h2>All Expenses Records</h2>
-          ${table}
-          <div class="footer">
-            Printed on ${new Date().toLocaleString()} by Fishing Operation Manager
-          </div>
-        </div>
-      </body>
-    </html>
-  `);
-  win.document.close();
-  win.print();
+function printAllExpenses() {
+  const searchValue = document.getElementById("expense-search").value;
+
+  fetch(`print_expense.php?search=${encodeURIComponent(searchValue)}`)
+    .then(res => res.json())
+    .then(rows => {
+      let html = `
+        <h2>Expenses Report</h2>
+        <table border="1" width="100%">
+          <tr>
+            <th>Fisherman</th>
+            <th>Feeds</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Date</th>
+          </tr>
+      `;
+
+      rows.forEach(e => {
+        html += `
+          <tr>
+            <td>${e.Fisherman}</td>
+            <td>${e.TypeofFeeds}</td>
+            <td>₱${Number(e.Price).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+            <td>${Number(e.Quantity).toLocaleString()}</td>
+            <td>₱${Number(e.TotalAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+            <td>${e.TransactionDate}</td>
+          </tr>
+        `;
+      });
+
+      html += "</table>";
+
+      const win = window.open("", "", "width=900,height=600");
+      win.document.write(html);
+      win.document.close();
+      win.print();
+      win.close();
+    })
+    .catch(err => console.error("Print expenses failed:", err));
 }
 
-// --- Print All Harvests ---
-function printHarvests() {
-  const table = document.getElementById('harvests-table').outerHTML;
-  const win = window.open('', '', 'width=900,height=700');
-  win.document.write(`
-    <html>
-      <head>
-        <title>All Harvest Records</title>
-        <style>
-          body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: #F3F9FF;
-            color: #082E76;
-            margin: 40px;
-          }
-          .report-container {
-            background: white;
-            border: 3px solid #2E549C;
-            border-radius: 12px;
-            padding: 25px 35px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
-          }
-          h2 {
-            text-align: center;
-            color: #082E76;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #2E549C;
-            padding-bottom: 8px;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-          }
-          th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-          }
-          th {
-            background-color: #2E549C;
-            color: white;
-          }
-          tfoot td {
-            background: #F3F9FF;
-            font-weight: bold;
-          }
-          .footer {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #515760;
-            margin-top: 25px;
-          }
-          @media print {
-            .footer { display: none; }
-            body { background: white; margin: 0; }
-            .report-container { border: none; box-shadow: none; padding: 0; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="report-container">
-          <h2>All Harvest Records</h2>
-          ${table}
-          <div class="footer">
-            Printed on ${new Date().toLocaleString()} by Fishing Operation Manager
-          </div>
-        </div>
-      </body>
-    </html>
-  `);
-  win.document.close();
-  win.print();
+function printAllHarvests() {
+  const searchValue = document.getElementById("harvest-search").value;
+
+  fetch(`print_harvests.php?search=${encodeURIComponent(searchValue)}`)
+    .then(res => res.json())
+    .then(rows => {
+
+      let tableHTML = `
+<h2>Harvest Report</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Fisherman</th>
+      <th>Kilo of Fish</th>
+      <th>Price/kilo</th>
+      <th>Subtotal</th>
+      <th>Similia</th>
+      <th>Feeds</th>
+      <th>Total Expenses</th>
+      <th>Profit</th>
+      <th>Divided Profit</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+`;
+
+
+      rows.forEach(h => {
+        tableHTML += `
+          <tr>
+            <td>${h.Fisherman}</td>
+            <td>${Number(h.KiloofFish).toLocaleString()}</td>
+            <td>₱${Number(h.Priceperkilo).toLocaleString('en-PH')}</td>
+            <td>₱${Number(h.Subtotal).toLocaleString('en-PH')}</td>
+            <td>₱${Number(h.AmountofSimilia).toLocaleString('en-PH')}</td>
+            <td>₱${Number(h.AmountofFeeds).toLocaleString('en-PH')}</td>
+            <td>₱${Number(h.TotalExpense).toLocaleString('en-PH')}</td>
+            <td>₱${Number(h.Profit).toLocaleString('en-PH')}</td>
+            <td>₱${Number(h.Dividedprofit).toLocaleString('en-PH')}</td>
+            <td>${h.Date}</td>
+          </tr>
+        `;
+      });
+
+      tableHTML += `</tbody></table>`;
+
+
+      const win = window.open("", "", "width=1200,height=700");
+
+      win.document.write(`
+<html>
+<head>
+  <title>Harvest Report</title>
+  <style>
+    @media print {
+      @page {
+        size: landscape;
+        margin: 12mm;
+      }
+
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 10px;
+        color: #1f2937;
+      }
+
+      h2 {
+        text-align: center;
+        color: #082E76;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead th {
+        background-color: #082E76;
+        color: #ffffff;
+        padding: 6px 4px;
+        border: 1px solid #082E76;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 9px;
+      }
+
+      tbody td {
+        border: 1px solid #d1d5db;
+        padding: 5px 4px;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #f3f6fb;
+      }
+
+      tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+      }
+
+      td:last-child {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  ${tableHTML}
+</body>
+</html>
+`);
+
+
+      win.document.close();
+      win.print();
+      win.close();
+    })
+    .catch(err => console.error("Print harvests failed:", err));
 }
+
+
 
 // --- Print All Feedstocks (Transactions) ---
 function printTransactions() {

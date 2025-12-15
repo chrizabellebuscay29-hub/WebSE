@@ -112,21 +112,21 @@
 
       </select>
       <label>Kilo of Fish:</label>
-      <input id="harvest-kilo" name="KiloofFish" class="input" type="number" step="0.01" required />
+      <input id="harvest-kilo" name="KiloofFish" class="input" type="number" step="0.01"  oninput="formatNumberInput(this)" required />
       <label>Price per Kilo:</label>
-      <input id="harvest-price" name="Priceperkilo" class="input" type="number" step="0.01" required />
+      <input id="harvest-price" name="Priceperkilo" class="input" type="number" step="0.01"  oninput="formatNumberInput(this)" required />
       <label>Subtotal:</label>
-      <input id="harvest-subtotal" name="Subtotal" class="input" type="number" step="0.01" required readonly />
+      <input id="harvest-subtotal" name="Subtotal" class="input" type="number" step="0.01"  oninput="formatNumberInput(this)" required readonly />
       <label>Amount of Similia:</label>
-      <input id="harvest-similia" name="AmountofSimilia" class="input" type="number" step="0.01" required readonly  />
+      <input id="harvest-similia" name="AmountofSimilia" class="input" type="number" step="0.01"  oninput="formatNumberInput(this)" required readonly  />
       <label>Amount of Feeds:</label>
-      <input id="harvest-feeds" name="AmountofFeeds" class="input" type="number" step="0.01" required />
+      <input id="harvest-feeds" name="AmountofFeeds" class="input" type="number" step="0.01"  oninput="formatNumberInput(this)" required />
       <label>Total Expenses:</label>
-      <input id="harvest-expenses" name="TotalExpense" class="input" type="number" step="0.01" required readonly />
+      <input id="harvest-expenses" name="TotalExpense" class="input" type="number" step="0.01"  oninput="formatNumberInput(this)" required readonly />
       <label>Profit Details:</label>
-      <input id="harvest-profit" name="Profit" class="input" type="number" step="0.01" required readonly />
+      <input id="harvest-profit" name="Profit" class="input" type="number" step="0.01"  oninput="formatNumberInput(this)" required readonly />
       <label>Divided Profit:</label>
-      <input id="harvest-divprofit" name="Dividedprofit" class="input" type="number" step="0.01" required readonly />
+      <input id="harvest-divprofit" name="Dividedprofit" class="input" type="number" step="0.01"  oninput="formatNumberInput(this)" required readonly />
       <label>Date:</label>
       <input id="harvest-date" name="Date" class="input" type="date" required />
       <button class="btn btn-primary" type="submit">Save Harvest</button>
@@ -190,6 +190,9 @@
 
 <!-- Cancel helpers -->
 <script>
+const num = v => Number(v || 0);
+
+
 function handleWorkerCancel(){document.getElementById("worker-form").reset();closeWorkerDialog();}
 function handleExpenseCancel(){document.getElementById("expense-form").reset();closeExpenseDialog();}
 function handleHarvestCancel(){document.getElementById("harvest-form").reset();closeHarvestDialog();}
@@ -249,26 +252,29 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
-function loadExpenses() {
+let currentExpensePage = 1; // Track current page globally
+
+function loadExpenses(page = 1) {
   const searchValue = document.getElementById("expense-search").value;
-  fetch(`fetch_expenses.php?search=${encodeURIComponent(searchValue)}`)
+
+  fetch(`fetch_expenses.php?search=${encodeURIComponent(searchValue)}&page=${page}`)
     .then(res => res.json())
     .then(data => {
       const tableBody = document.querySelector("#expenses-table tbody");
       tableBody.innerHTML = "";
       let total = 0;
 
-      if (data.length === 0) {
+      if (data.data.length === 0) {
         tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>No records found.</td></tr>";
       } else {
-        data.forEach(exp => {
+        data.data.forEach(exp => {
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${exp.Fisherman}</td>
             <td>${exp.TypeofFeeds}</td>
-            <td>₱${parseFloat(exp.Price).toFixed(2)}</td>
-            <td>${exp.Quantity}</td>
-            <td>₱${parseFloat(exp.TotalAmount).toFixed(2)}</td>
+            <td>₱${parseFloat(exp.Price).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+            <td>${parseFloat(exp.Quantity).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+            <td>₱${parseFloat(exp.TotalAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
             <td>${exp.TransactionDate}</td>
           `;
           tableBody.appendChild(row);
@@ -276,130 +282,231 @@ function loadExpenses() {
         });
       }
 
-      document.getElementById("total-expenses-sum").textContent = "₱" + total.toFixed(2);
+      
 
-      // 🪄 Save fisherman + total for Harvest autofill
-const fisherman = document.getElementById("expense-search").value.trim();
-if (fisherman !== "") {
-  localStorage.setItem("latestFisherman", fisherman);
-  localStorage.setItem("latestFeedsTotal", total.toFixed(2));
-  console.log("Saved total feeds:", fisherman, total.toFixed(2));
+      // === Pagination Controls ===
+      const pagination = document.getElementById("expense-pagination");
+      pagination.innerHTML = "";
+      pagination.style.display = "flex";
+      pagination.style.justifyContent = "center";
+      pagination.style.alignItems = "center";
+      pagination.style.gap = "10px";
+      pagination.style.marginTop = "15px";
+
+      // ← Previous Button
+      const prevBtn = document.createElement("button");
+      prevBtn.innerHTML = "&#8592;";
+      prevBtn.className = "btn btn-outline";
+      prevBtn.disabled = (data.current_page <= 1);
+      prevBtn.onclick = () => loadExpenses(data.current_page - 1);
+      pagination.appendChild(prevBtn);
+
+      // 🔢 Page Number Display (styled same as buttons)
+      const pageInfo = document.createElement("button");
+      pageInfo.textContent = `${data.current_page} / ${data.total_pages}`;
+      pageInfo.className = "btn btn-outline";
+      pageInfo.disabled = true;
+      pageInfo.style.cursor = "default";
+      pageInfo.style.opacity = "1"; // same full visibility
+      pageInfo.style.backgroundColor = "rgba(255, 255, 255, 0.95)"; // brighter white
+      pageInfo.style.color = "#082E76";
+      pageInfo.style.fontWeight = "600";
+      pageInfo.style.border = "1px solid #e2e8f0";
+      pagination.appendChild(pageInfo);
+
+      // → Next Button
+      const nextBtn = document.createElement("button");
+      nextBtn.innerHTML = "&#8594;";
+      nextBtn.className = "btn btn-outline";
+      nextBtn.disabled = (data.current_page >= data.total_pages);
+      nextBtn.onclick = () => loadExpenses(data.current_page + 1);
+      pagination.appendChild(nextBtn);
+
+      currentExpensePage = data.current_page;
+    })
+    .catch(err => console.error("Error loading expenses:", err));
 }
 
-    })
-    .catch(err => {
-      console.error("Error loading expenses:", err);
+document.addEventListener("DOMContentLoaded", function() {
+  loadExpenses(); // loads page 1 on startup
+  updateExpenseTotal();
+refreshFeedsData()
+});
+// === Fetch total expenses for searched fisherman ===
+function updateExpenseTotal() {
+  const searchValue = document.getElementById("expense-search").value.trim();
+  console.log("Searching total for:", searchValue); // 👈 DEBUG
+
+  fetch(`fetch_expense_total.php?search=${encodeURIComponent(searchValue)}`)
+    .then(res => res.json())
+    .then(data => {
+      console.log("Total response:", data); // 👈 DEBUG
+      document.getElementById("expense-total").value =
+        "₱" + Number(data.total).toLocaleString('en-PH', {
+          minimumFractionDigits: 2
+        });
     });
 }
 
-// Auto-load all expenses when page first loads
-document.addEventListener("DOMContentLoaded", loadExpenses);
 
-function searchFisherman() {
-  const fisherman = document.getElementById("expense-search").value.trim();
-  if (fisherman === "") return alert("Please enter a fisherman name.");
 
-  fetch(`get_total_feeds.php?fisherman=${encodeURIComponent(fisherman)}`)
+let currentHarvestPage = 1;
+
+function loadHarvests(page = 1) {
+  currentHarvestPage = page;
+
+  const search = document.getElementById("harvest-search")?.value || "";
+
+  fetch(`fetch_harvests.php?page=${page}&search=${encodeURIComponent(search)}`)
     .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        document.getElementById("fisherman-total").innerText = 
-          `Total Feeds Amount for ${fisherman}: ₱${parseFloat(data.total).toFixed(2)}`;
+    .then(result => {
 
-        // 🪄 Save it in localStorage for the Harvest autofill later
-        localStorage.setItem("latestFeedsTotal", data.total);
-        localStorage.setItem("latestFisherman", fisherman);
-      } else {
-        alert("No records found for that fisherman.");
-      }
-    })
-    .catch(err => console.error("Error fetching total feeds:", err));
-}
-
-
-
-function loadHarvests() {
-  const searchValue = document.getElementById("harvest-search").value;
-  fetch(`fetch_harvests.php?search=${encodeURIComponent(searchValue)}`)
-    .then(res => res.json())
-    .then(data => {
       const tableBody = document.querySelector("#harvests-table tbody");
       tableBody.innerHTML = "";
-      let total = 0;
 
-      if (data.length === 0) {
-        tableBody.innerHTML = "<tr><td colspan='10' style='text-align:center;'>No records found.</td></tr>";
-      } else {
-        data.forEach(harvest => {
-          const pricePerKilo = parseFloat(harvest.Priceperkilo) || 0;
-          const kiloOfFish = parseFloat(harvest.KiloofFish) || 0;
-          const subtotal = parseFloat(harvest.Subtotal) || (pricePerKilo * kiloOfFish);
-          const totalExpense = parseFloat(harvest.TotalExpense) || 0;
-          const profit = parseFloat(harvest.Profit) || (subtotal - totalExpense);
-          const dividedProfit = parseFloat(harvest.Dividedprofit) || (profit / 2);
-
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${harvest.Fisherman}</td>
-            <td>${kiloOfFish}</td>
-            <td>₱${pricePerKilo.toFixed(2)}</td>
-            <td>₱${subtotal.toFixed(2)}</td>
-            <td>₱${parseFloat(harvest.AmountofSimilia || 0).toFixed(2)}</td>
-            <td>₱${parseFloat(harvest.AmountofFeeds || 0).toFixed(2)}</td>
-            <td>₱${totalExpense.toFixed(2)}</td>
-            <td>₱${profit.toFixed(2)}</td>
-            <td>₱${dividedProfit.toFixed(2)}</td>
-            <td>${harvest.Date}</td>
-          `;
-          tableBody.appendChild(row);
-          total += profit;
-        });
+      if (!result.data || result.data.length === 0) {
+        tableBody.innerHTML =
+          "<tr><td colspan='10' style='text-align:center;'>No records found.</td></tr>";
+        return;
       }
 
-      document.getElementById("total-profit-sum").textContent = "₱" + total.toFixed(2);
+      result.data.forEach(h => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${h.Fisherman}</td>
+          <td>${Number(h.KiloofFish).toLocaleString()}</td>
+          <td>₱${Number(h.Priceperkilo).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+          <td>₱${Number(h.Subtotal).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+          <td>₱${Number(h.AmountofFeeds).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+          <td>₱${Number(h.AmountofSimilia).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+          <td>₱${Number(h.TotalExpense).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+          <td>₱${Number(h.Profit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+          <td>₱${Number(h.Dividedprofit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+          <td>${h.Date}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      // === Pagination Controls (SAME AS TRANSACTIONS) ===
+      const pagination = document.getElementById("harvests-pagination");
+      pagination.innerHTML = "";
+      pagination.style.display = "flex";
+      pagination.style.justifyContent = "center";
+      pagination.style.alignItems = "center";
+      pagination.style.gap = "10px";
+      pagination.style.marginTop = "15px";
+
+      // ← Previous
+      const prevBtn = document.createElement("button");
+      prevBtn.innerHTML = "&#8592;";
+      prevBtn.className = "btn btn-outline";
+      prevBtn.disabled = (result.current_page <= 1);
+      prevBtn.onclick = () => loadHarvests(result.current_page - 1);
+      pagination.appendChild(prevBtn);
+
+      // Page number
+      const pageInfo = document.createElement("button");
+      pageInfo.textContent = `${result.current_page} / ${result.total_pages}`;
+      pageInfo.className = "btn btn-outline";
+      pageInfo.disabled = true;
+      pageInfo.style.cursor = "default";
+      pageInfo.style.opacity = "1";
+      pageInfo.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+      pageInfo.style.color = "#082E76";
+      pageInfo.style.fontWeight = "600";
+      pageInfo.style.border = "1px solid #e2e8f0";
+      pagination.appendChild(pageInfo);
+
+      // → Next
+      const nextBtn = document.createElement("button");
+      nextBtn.innerHTML = "&#8594;";
+      nextBtn.className = "btn btn-outline";
+      nextBtn.disabled = (result.current_page >= result.total_pages);
+      nextBtn.onclick = () => loadHarvests(result.current_page + 1);
+      pagination.appendChild(nextBtn);
+
     })
-    .catch(err => {
-      console.error("Error loading harvests:", err);
-    });
+    .catch(err => console.error("Harvest load error:", err));
 }
 
+// Auto-load
+document.addEventListener("DOMContentLoaded", () => loadHarvests());
 
-// Auto-load all harvests when page first loads
-document.addEventListener("DOMContentLoaded", loadHarvests);
 
 
-function loadTransactions() {
+let currentTransactionPage = 1;
+
+function loadTransactions(page = 1) {
   const searchValue = document.getElementById("transaction-search").value;
-  fetch(`fetch_transactions.php?search=${encodeURIComponent(searchValue)}`)
+
+  fetch(`fetch_transactions.php?search=${encodeURIComponent(searchValue)}&page=${page}`)
     .then(res => res.json())
     .then(data => {
       const tableBody = document.querySelector("#transactions-table tbody");
       tableBody.innerHTML = "";
-      let totalSum = 0;
+      let total = 0;
 
-      if (data.length === 0) {
+      if (data.data.length === 0) {
         tableBody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No records found.</td></tr>";
       } else {
-        data.forEach(tx => {
-          const row = document.createElement("tr");
-          const total = parseFloat(tx.Price) * parseFloat(tx.Quantity);
-          row.innerHTML = `
-            <td>${tx.NameofFeeds}</td>
-            <td>₱${parseFloat(tx.Price).toFixed(2)}</td>
-            <td>${tx.Quantity}</td>
-            <td>₱${total.toFixed(2)}</td>
-            <td>${tx.Date}</td>
+        data.data.forEach(row => {
+          const tr = document.createElement("tr");
+          const totalAmount = row.Quantity * row.Price;
+          tr.innerHTML = `
+            <td>${row.NameofFeeds}</td>
+            <td>₱${parseFloat(row.Price).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+            <td>${parseFloat(row.Quantity).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+            <td>₱${parseFloat(totalAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+            <td>${row.Date}</td>
           `;
-          tableBody.appendChild(row);
-          totalSum += total;
+          tableBody.appendChild(tr);
+          total += totalAmount;
         });
       }
 
-      document.getElementById("total-stock-sum").textContent = "₱" + totalSum.toFixed(2);
+    
+
+      // === Pagination Controls ===
+      const pagination = document.getElementById("transaction-pagination");
+      pagination.innerHTML = "";
+      pagination.style.display = "flex";
+      pagination.style.justifyContent = "center";
+      pagination.style.alignItems = "center";
+      pagination.style.gap = "10px";
+      pagination.style.marginTop = "15px";
+
+      // ← Previous
+      const prevBtn = document.createElement("button");
+      prevBtn.innerHTML = "&#8592;";
+      prevBtn.className = "btn btn-outline";
+      prevBtn.disabled = (data.current_page <= 1);
+      prevBtn.onclick = () => loadTransactions(data.current_page - 1);
+      pagination.appendChild(prevBtn);
+
+      // Page number
+      const pageInfo = document.createElement("button");
+      pageInfo.textContent = `${data.current_page} / ${data.total_pages}`;
+      pageInfo.className = "btn btn-outline";
+      pageInfo.disabled = true;
+      pageInfo.style.cursor = "default";
+      pageInfo.style.opacity = "1";
+      pageInfo.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+      pageInfo.style.color = "#082E76";
+      pageInfo.style.fontWeight = "600";
+      pageInfo.style.border = "1px solid #e2e8f0";
+      pagination.appendChild(pageInfo);
+
+      // → Next
+      const nextBtn = document.createElement("button");
+      nextBtn.innerHTML = "&#8594;";
+      nextBtn.className = "btn btn-outline";
+      nextBtn.disabled = (data.current_page >= data.total_pages);
+      nextBtn.onclick = () => loadTransactions(data.current_page + 1);
+      pagination.appendChild(nextBtn);
+
+      currentTransactionPage = data.current_page;
     })
-    .catch(err => {
-      console.error("Error loading transactions:", err);
-    });
+    .catch(err => console.error("Error loading transactions:", err));
 }
 
 // Auto-load all feedstocks when page loads
@@ -487,6 +594,23 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 });
+
+
+
+function formatNumberInput(input) {
+  // remove commas
+  let value = input.value.replace(/,/g, '');
+
+  // allow empty
+  if (value === '' || isNaN(value)) {
+    input.value = '';
+    return;
+  }
+
+  // format with commas
+  input.value = Number(value).toLocaleString('en-PH');
+}
+
 
 
 </script>
