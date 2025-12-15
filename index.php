@@ -573,23 +573,32 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchWorkers();
 
   // Form submission
-  document.getElementById("worker-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    saveWorker();
-  });
+  const wf = document.getElementById("worker-form");
+  if (wf) {
+    wf.addEventListener("submit", function(e) {
+      e.preventDefault();
+      saveWorker();
+    });
+  }
 });
 
-// Open modal
+// Open modal (kept for compatibility)
 function openWorkerDialog(editId = null, name = "") {
-  document.getElementById("worker-dialog").style.display = "block";
-  document.getElementById("worker-id").value = editId || "";
-  document.getElementById("worker-name").value = name || "";
-  document.getElementById("worker-modal-title").innerText = editId ? "Edit Worker" : "Add Worker";
+  const modal = document.getElementById("worker-dialog");
+  if (!modal) return;
+  modal.style.display = "block";
+  const idInput = document.getElementById("worker-id");
+  const nameInput = document.getElementById("worker-name");
+  const title = document.getElementById("worker-modal-title");
+  if (idInput) idInput.value = editId || "";
+  if (nameInput) nameInput.value = name || "";
+  if (title) title.innerText = editId ? "Edit Worker" : "Add Worker";
 }
 
 // Close modal
 function closeWorkerDialog() {
-  document.getElementById("worker-dialog").style.display = "none";
+  const modal = document.getElementById("worker-dialog");
+  if (modal) modal.style.display = "none";
 }
 
 // ✅ Automatically set the worker date to today's date
@@ -604,27 +613,12 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-// ✅ Reapply today’s date whenever the Worker modal opens
-function openWorkerDialog() {
-  const dialog = document.getElementById("worker-dialog");
-  const workerDateInput = document.getElementById("worker-date");
-  dialog.classList.add("active");
-
-  if (workerDateInput) {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    workerDateInput.value = `${yyyy}-${mm}-${dd}`;
-  }
-}
-
 // ✅ When modal closes or cancel button clicked
 function handleWorkerCancel() {
   const dialog = document.getElementById("worker-dialog");
   const form = document.getElementById("worker-form");
-  dialog.classList.remove("active");
-  form.reset();
+  if (dialog) dialog.classList.remove("active");
+  if (form) form.reset();
 
   // reset the date again to today
   const workerDateInput = document.getElementById("worker-joined");
@@ -644,6 +638,7 @@ function fetchWorkers() {
     .then(res => res.json())
     .then(data => {
       const container = document.getElementById("workers-list");
+      if (!container) return;
       container.innerHTML = "";
       data.forEach(worker => {
         const div = document.createElement("div");
@@ -676,46 +671,48 @@ function fetchWorkers() {
 `;
 
         container.appendChild(div);
-            // =============================
-// Update dropdowns dynamically
-// =============================
-const expenseDropdown = document.getElementById("expense-worker");
-const harvestDropdown = document.getElementById("harvest-worker");
-
-if (expenseDropdown && harvestDropdown) {
-  // Clear existing options
-  expenseDropdown.innerHTML = '<option value="">-- Select Worker --</option>';
-  harvestDropdown.innerHTML = '<option value="">-- Select Worker --</option>';
-
-  // Add all fetched workers
-  data.forEach(worker => {
-    const option1 = document.createElement("option");
-    option1.value = worker.Fisherman;
-    option1.textContent = worker.Fisherman;
-    option1.setAttribute("data-similia", worker.AmountofSimilia);
-
-    const option2 = option1.cloneNode(true);
-
-    expenseDropdown.appendChild(option1);
-    harvestDropdown.appendChild(option2);
-  });
-}
       });
-    });
 
+      // =============================
+      // Update dropdowns dynamically
+      // =============================
+      const expenseDropdown = document.getElementById("expense-worker");
+      const harvestDropdown = document.getElementById("harvest-worker");
 
+      if (expenseDropdown && harvestDropdown) {
+        // Clear existing options
+        expenseDropdown.innerHTML = '<option value="">-- Select Worker --</option>';
+        harvestDropdown.innerHTML = '<option value="">-- Select Worker --</option>';
 
+        // Add all fetched workers
+        data.forEach(worker => {
+          const option1 = document.createElement("option");
+          option1.value = worker.Fisherman;
+          option1.textContent = worker.Fisherman;
+          option1.setAttribute("data-similia", worker.AmountofSimilia);
+
+          const option2 = option1.cloneNode(true);
+
+          expenseDropdown.appendChild(option1);
+          harvestDropdown.appendChild(option2);
+        });
+      }
+    })
+    .catch(err => console.error("Error fetching workers:", err));
 }
 
 // Save worker (add or edit)
 function saveWorker() {
-  const formData = new FormData(document.getElementById("worker-form"));
+  const form = document.getElementById("worker-form");
+  if (!form) return;
+  const formData = new FormData(form);
   fetch('workers_save.php', { method: 'POST', body: formData })
     .then(res => res.text())
     .then(() => {
       closeWorkerDialog();
       fetchWorkers(); // ✅ refresh worker list + dropdowns instantly
-    });
+      if (typeof loadDashboard === 'function') loadDashboard(); // refresh dashboard if available
+    }).catch(err => console.error("Error saving worker:", err));
 }
 
 
@@ -736,27 +733,29 @@ document.addEventListener("DOMContentLoaded", function() {
   const totalInput = document.getElementById("expense-amount");
 
   // Initialize Select2
-  feedSelect.select2({
-    placeholder: "-- Select Feed --",
-    allowClear: true,
-    width: "100%"
-  });
+  if (feedSelect.length) {
+    feedSelect.select2({
+      placeholder: "-- Select Feed --",
+      allowClear: true,
+      width: "100%"
+    });
 
-  function calculateTotal() {
-    const price = parseFloat(priceInput.value) || 0;
-    const quantity = parseFloat(quantityInput.value) || 0;
-    totalInput.value = (price * quantity).toFixed(2);
+    function calculateTotal() {
+      const price = parseFloat(priceInput.value) || 0;
+      const quantity = parseFloat(quantityInput.value) || 0;
+      if (totalInput) totalInput.value = (price * quantity).toFixed(2);
+    }
+
+    // Use Select2's change event
+    feedSelect.on("change", function() {
+      const selectedOption = $(this).find(":selected");
+      const feedPrice = parseFloat(selectedOption.data("price")) || 0;
+      if (priceInput) priceInput.value = feedPrice.toFixed(2);
+      calculateTotal();
+    });
+
+    $("#expense-quantity").on("input", calculateTotal);
   }
-
-  // Use Select2's change event
-  feedSelect.on("change", function() {
-    const selectedOption = $(this).find(":selected");
-    const feedPrice = parseFloat(selectedOption.data("price")) || 0;
-    priceInput.value = feedPrice.toFixed(2);
-    calculateTotal();
-  });
-
-  $("#expense-quantity").on("input", calculateTotal);
 });
 
 
@@ -765,6 +764,7 @@ function refreshFeedsData() {
     .then(res => res.json())
     .then(data => {
       const feedSelect = document.getElementById("expense-category");
+      if (!feedSelect) return;
       feedSelect.innerHTML = '<option value="">-- Select Feed --</option>';
 
       data.forEach(feed => {
@@ -786,39 +786,40 @@ function refreshFeedsData() {
   // ===== EXPENSE FORM =====
  document.addEventListener("DOMContentLoaded", function() {
   const expenseForm = document.getElementById("expense-form");
+  if (!expenseForm) return;
 
   expenseForm.addEventListener("submit", function(e) {
     e.preventDefault();
     const formData = new FormData(expenseForm);
 
     fetch("addexpense.php", {
-  method: "POST",
-  body: formData
-})
-.then(res => res.json())
-.then(data => {
-  if (data.success) {
-    showReceipt(data.receiptData, "Expense Receipt");
-    closeExpenseDialog();
-    expenseForm.reset();
+      method: "POST",
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showReceipt(data.receiptData, "Expense Receipt");
+        closeExpenseDialog();
+        expenseForm.reset();
 
-    loadExpenses(currentExpensePage);     // ✅ refresh expenses
-    loadTransactions(currentTransactionPage); // ✅ refresh transactions (THIS FIXES IT)
-    refreshFeedsData();                   // ✅ refresh stock source
-
-  } else {
-    alert("❌ " + data.message);
-  }
-})
-.catch(err => {
-  console.error("Fetch Error:", err);
-  alert("Error: Could not connect to server.");
-});
+        if (typeof loadExpenses === 'function') loadExpenses(1);     // refresh expenses
+        if (typeof loadTransactions === 'function') loadTransactions(1); // refresh transactions
+        refreshFeedsData();                   // refresh stock source
+        if (typeof loadDashboard === 'function') loadDashboard(); // update dashboard
+      } else {
+        alert("❌ " + data.message);
+      }
+    })
+    .catch(err => {
+      console.error("Fetch Error:", err);
+      alert("Error: Could not connect to server.");
+    });
   });
 });
 
 
-document.getElementById("harvest-form").addEventListener("submit", function () {
+document.getElementById && document.getElementById("harvest-form") && document.getElementById("harvest-form").addEventListener("submit", function () {
   this.querySelectorAll("input[type='text']").forEach(input => {
     input.value = input.value.replace(/,/g, '');
   });
@@ -840,7 +841,8 @@ document.getElementById("harvest-form").addEventListener("submit", function () {
           if (data.success) {
             closeHarvestDialog();
             showReceipt(data.data, "Harvest Receipt");
-            loadHarvests();
+            if (typeof loadHarvests === 'function') loadHarvests();
+            if (typeof loadDashboard === 'function') loadDashboard();
           } else {
             alert("❌ " + data.message);
           }
@@ -872,8 +874,9 @@ document.addEventListener("DOMContentLoaded", function() {
           alert(data.message);
           transactionForm.reset();
           closeTransactionDialog();
-          loadTransactions();   // refresh the table dynamically
+          if (typeof loadTransactions === 'function') loadTransactions();   // refresh the table dynamically
           refreshFeedsData();   // refresh dropdown for expense section
+          if (typeof loadDashboard === 'function') loadDashboard();
         } else {
           alert(data.message);
         }
@@ -889,9 +892,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // --- Print All Expenses ---
 function printAllExpenses() {
-  const searchValue = document.getElementById("expense-search").value;
+  const searchValue = document.getElementById("expense-search") ? document.getElementById("expense-search").value : '';
 
-  fetch(`print_expense.php?search=${encodeURIComponent(searchValue)}`)
+  fetch(`print_expense.php?search=${encodeURIComponent(searchValue)}&all=1`)
     .then(res => res.json())
     .then(rows => {
       let tableHTML = `
@@ -917,7 +920,7 @@ function printAllExpenses() {
             <td>₱${Number(e.Price).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
             <td>${Number(e.Quantity).toLocaleString()}</td>
             <td>₱${Number(e.TotalAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-            <td>${e.TransactionDate}</td>
+            <td>${e.TransactionDate || e.Date || ''}</td>
           </tr>
         `;
       });
@@ -925,14 +928,15 @@ function printAllExpenses() {
       tableHTML += `</tbody></table>`;
 
       printWithStandardLayout("Expenses Report", tableHTML);
-    });
+    })
+    .catch(err => console.error("Error printing expenses:", err));
 }
 
 
 function printAllHarvests() {
-  const searchValue = document.getElementById("harvest-search").value;
+  const searchValue = document.getElementById("harvest-search") ? document.getElementById("harvest-search").value : '';
 
-  fetch(`print_harvests.php?search=${encodeURIComponent(searchValue)}`)
+  fetch(`print_harvests.php?search=${encodeURIComponent(searchValue)}&all=1`)
     .then(res => res.json())
     .then(rows => {
       let tableHTML = `
@@ -974,7 +978,8 @@ function printAllHarvests() {
       tableHTML += `</tbody></table>`;
 
       printWithStandardLayout("Harvest Report", tableHTML);
-    });
+    })
+    .catch(err => console.error("Error printing harvests:", err));
 }
 
 
@@ -1123,7 +1128,8 @@ function setCurrentDate(inputId) {
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, '0');
   const dd = String(today.getDate()).padStart(2, '0');
-  document.getElementById(inputId).value = `${yyyy}-${mm}-${dd}`;
+  const el = document.getElementById(inputId);
+  if (el) el.value = `${yyyy}-${mm}-${dd}`;
 }
 
 
@@ -1139,8 +1145,10 @@ function searchFisherman() {
     .then(data => {
       if (data.success) {
         const total = parseFloat(data.total) || 0;
-        document.getElementById("fisherman-total").innerText =
-          `Total Feeds Amount for ${fisherman}: ₱${total.toFixed(2)}`;
+        const el = document.getElementById("fisherman-total");
+        if (el) {
+          el.innerText = `Total Feeds Amount for ${fisherman}: ₱${total.toFixed(2)}`;
+        }
 
         // 🪄 Save temporarily for Harvest autofill
         localStorage.setItem("latestFeedsTotal", total);
@@ -1252,6 +1260,212 @@ function searchFisherman() {
   win.print();
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+  loadDashboard();
+});
+
+function loadDashboard() {
+  fetch("fetch_dashboard.php")
+    .then(res => res.json())
+    .then(d => {
+      // Workers
+      const workersEl = document.getElementById("total-workers");
+      if (workersEl) {
+        workersEl.textContent = d.total_workers;
+      }
+
+      // Expenses
+      const expensesEl = document.getElementById("total-expenses");
+      if (expensesEl) {
+        expensesEl.textContent =
+          "₱" + Number(d.total_expenses).toLocaleString("en-PH", {
+            minimumFractionDigits: 2
+          });
+      }
+
+      // Harvest value
+      const harvestEl = document.getElementById("harvest-value");
+      if (harvestEl) {
+        harvestEl.textContent =
+          "₱" + Number(d.total_harvest).toLocaleString("en-PH", {
+            minimumFractionDigits: 2
+          });
+      }
+
+      // Net profit
+      const profitEl = document.getElementById("net-profit");
+      if (profitEl) {
+        profitEl.textContent =
+          "₱" + Number(d.net_profit).toLocaleString("en-PH", {
+            minimumFractionDigits: 2
+          });
+      }
+    })
+    .catch(err => console.error("Dashboard load error:", err));
+}
+
+
   </script>
+
+  <!-- Integrated DB-wide expense-total-by-name script (inserted as requested) -->
+<script>
+(function() {
+  function parseNumber(str) {
+    if (str === null || str === undefined || str === '') return 0;
+    const cleaned = String(str).replace(/[^0-9.-]+/g, '');
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function formatPeso(n) {
+    return '₱' + (Number(n) || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  // Sum rows but only include rows whose Fisherman value matches (case-insensitive contains)
+  function sumRowsFiltered(rows, name) {
+    if (!Array.isArray(rows)) return 0;
+    const needle = (name || '').toString().trim().toLowerCase();
+    return rows.reduce((acc, e) => {
+      const fisherman = (e.Fisherman || e.fisherman || '').toString().toLowerCase();
+      if (!needle) {
+        // no filter: include all rows
+      } else {
+        // include only if fisherman contains the search term
+        if (!fisherman.includes(needle)) return acc;
+      }
+      const price = parseNumber(e.Price || e.price || 0);
+      const qty = parseNumber(e.Quantity || e.quantity || 0);
+      const totalAmount = parseNumber(e.TotalAmount || e.total_amount || e.Total || (price * qty));
+      return acc + totalAmount;
+    }, 0);
+  }
+
+  // Try direct total endpoint (recommended), else fetch all rows and filter client-side.
+  async function fetchDatabaseTotalForName(name = '') {
+    const encoded = encodeURIComponent(name || '');
+
+    // 1) Preferred: endpoint that returns just the total for a fisherman (fast).
+    // Try ?fisherman= first (common), then ?search=
+    const totalEndpoints = [
+      `print_expense_total.php?fisherman=${encoded}`,
+      `print_expense_total.php?search=${encoded}`,
+      `print_expense.php?search=${encoded}&all=1`
+    ];
+
+    // Try endpoints in order
+    for (const url of totalEndpoints) {
+      try {
+        const resp = await fetch(url, { cache: 'no-cache' });
+        if (!resp.ok) continue;
+        const j = await resp.json();
+
+        // If endpoint returns { total: number } use it directly
+        if (j && typeof j === 'object' && ('total' in j || 'sum' in j)) {
+          return parseNumber(j.total || j.sum);
+        }
+
+        // If returns an array of rows -> filter by name and sum
+        if (Array.isArray(j)) {
+          return sumRowsFiltered(j, name);
+        }
+
+        // If returns { rows: [...] } or { data: [...] } use that
+        if (j && Array.isArray(j.rows)) return sumRowsFiltered(j.rows, name);
+        if (j && Array.isArray(j.data)) return sumRowsFiltered(j.data, name);
+
+        // Some print endpoints may return an object with metadata and .rows
+        if (j && Array.isArray(j.result)) return sumRowsFiltered(j.result, name);
+      } catch (err) {
+        // try next strategy
+        console.debug('fetchDatabaseTotalForName: try failed for', url, err);
+      }
+    }
+
+    // If none of the above worked, fallback: sum visible table rows filtered by name
+    const tbody = document.querySelector('#expenses-table tbody');
+    if (tbody) {
+      let sum = 0;
+      const needle = (name || '').toString().trim().toLowerCase();
+      Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 5) return;
+        const fisherman = (tds[0].textContent || '').toLowerCase();
+        if (needle && !fisherman.includes(needle)) return;
+        sum += parseNumber(tds[4].textContent || '');
+      });
+      return sum;
+    }
+
+    return 0;
+  }
+
+  // Update #expense-total input with DB-wide total for name
+  async function updateTotalForName(name = '') {
+    const total = await fetchDatabaseTotalForName(name);
+    const el = document.getElementById('expense-total');
+    if (el) el.value = formatPeso(total);
+    return total;
+  }
+
+  // Preserve original functions if present
+  const originalSearchFisherman = (typeof window.searchFisherman === 'function') ? window.searchFisherman : null;
+  const originalLoadExpenses = (typeof window.loadExpenses === 'function') ? window.loadExpenses : null;
+
+  // Override searchFisherman: call original, then compute DB total for the exact search string
+  window.searchFisherman = function() {
+    try {
+      if (originalSearchFisherman) originalSearchFisherman();
+    } catch (err) {
+      console.warn('original searchFisherman error:', err);
+    }
+    const name = (document.getElementById('expense-search') || {}).value || '';
+    // compute DB-wide total for this searched name (not paged)
+    updateTotalForName(name);
+  };
+
+  // Override loadExpenses similarly: keep existing behavior then compute DB total for the search term
+  window.loadExpenses = function(page = 1) {
+    try {
+      if (originalLoadExpenses) originalLoadExpenses(page);
+    } catch (err) {
+      console.warn('original loadExpenses error:', err);
+    }
+    const name = (document.getElementById('expense-search') || {}).value || '';
+    updateTotalForName(name);
+  };
+
+  // Quick visible-table sum for immediate feedback (will be overwritten by DB total when ready)
+  function attachTableObserver() {
+    const tbody = document.querySelector('#expenses-table tbody');
+    if (!tbody) return;
+    const obs = new MutationObserver(() => {
+      let sum = 0;
+      const needle = (document.getElementById('expense-search') || {}).value.toString().trim().toLowerCase();
+      Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 5) return;
+        const fisherman = (tds[0].textContent || '').toLowerCase();
+        if (needle && !fisherman.includes(needle)) return;
+        sum += parseNumber(tds[4].textContent || '');
+      });
+      const el = document.getElementById('expense-total');
+      if (el) el.value = formatPeso(sum);
+    });
+    obs.observe(tbody, { childList: true, subtree: true, characterData: true });
+  }
+
+  // Init
+  document.addEventListener('DOMContentLoaded', function() {
+    attachTableObserver();
+    // initial DB-wide total (no filter)
+    updateTotalForName('');
+  });
+
+  // Expose helper if you want to call directly
+  window.computeExpenseTotalForName = fetchDatabaseTotalForName;
+  window.updateExpenseTotalForName = updateTotalForName;
+})();
+</script>
+
 </body>
 </html>
