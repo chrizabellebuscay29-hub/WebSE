@@ -216,7 +216,7 @@ include("connection.php");
   background-color: #688ce779;
 }
 /* Optional hover effect */
-#harvests-table tbody tr:hover {
+#expenses-table tbody tr:hover {
   background-color: #1c344e80;
 }
 
