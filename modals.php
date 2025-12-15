@@ -22,11 +22,23 @@
       <label for="worker-joined">Joined Date:</label>
       <input id="worker-joined" name="DateStarted" class="input" type="date" required />
       
-      <button class="btn btn-primary" type="submit">Save Worker</button>
-      <button type="button" class="btn btn-secondary" onclick="handleWorkerCancel()">Cancel</button>
+      <div class="modal-actions">
+  <button class="btn btn-primary" type="submit">Save Worker</button>
+  <button type="button" class="btn btn-secondary" onclick="handleWorkerCancel()">Cancel</button>
+</div>
     </form>
   </div>
 </div>
+
+<style>
+  .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+</style>
 
 <!-- ADD EXPENSE -->
 <div id="expense-dialog" class="modal">
@@ -81,8 +93,10 @@
       <label>Date:</label>
       <input id="expense-date" name="TransactionDate" class="input" type="date" required />
 
-      <button class="btn btn-primary" type="submit">Save Expense</button>
-      <button type="button" class="btn btn-secondary" onclick="handleExpenseCancel()">Cancel</button>
+     <div class="modal-actions">
+  <button class="btn btn-primary" type="submit">Save Expense</button>
+  <button type="button" class="btn btn-secondary" onclick="handleExpenseCancel()">Cancel</button>
+</div>
     </form>
   </div>
 </div>
@@ -129,8 +143,10 @@
       <input id="harvest-divprofit" name="Dividedprofit" class="input" type="number" step="0.01"  oninput="formatNumberInput(this)" required readonly />
       <label>Date:</label>
       <input id="harvest-date" name="Date" class="input" type="date" required />
-      <button class="btn btn-primary" type="submit">Save Harvest</button>
-      <button type="button" class="btn btn-secondary" onclick="handleHarvestCancel()">Cancel</button>
+     <div class="modal-actions">
+  <button class="btn btn-primary" type="submit">Save Harvest</button>
+  <button type="button" class="btn btn-secondary" onclick="handleHarvestCancel()">Cancel</button>
+</div>
     </form>
   </div>
 </div>
@@ -155,8 +171,10 @@
       <input id="transaction-quantity" name="Quantity" class="input" type="number" required />
       <label>Date:</label>
       <input id="transaction-date" name="Date" class="input" type="date" required />
-      <button class="btn btn-primary" type="submit">Save Transaction</button>
-      <button type="button" class="btn btn-secondary" onclick="handleTransactionCancel()">Cancel</button>
+      <div class="modal-actions">
+  <button class="btn btn-primary" type="submit">Save Transaction</button>
+  <button type="button" class="btn btn-secondary" onclick="handleTransactionCancel()">Cancel</button>
+</div>
     </form>
   </div>
 </div>

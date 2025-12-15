@@ -302,13 +302,17 @@ include("connection.php");
           <p class="page-subtitle">Track transaction expenses per worker</p>
         </div>
 
-<button class="btn btn-outline" onclick="printAllExpenses()">
-  <i class="fa-solid fa-print"></i> Print All
-</button>
+<div class="page-actions">
+  <button class="btn btn-outline" onclick="printAllExpenses()">
+    <i class="fa-solid fa-print"></i> Print All
+  </button>
+
+  <button class="btn btn-primary" onclick="openExpenseDialog()">
+    <i class="fa-solid fa-plus"></i> Add Expense
+  </button>
+</div>
 
 
-
-        <button class="btn btn-primary" onclick="openExpenseDialog()"><i class="fa-solid fa-plus"></i> Add Expense</button>
       </div>
       <div id="expenses-list">
                    <!-- Search bar -->
@@ -372,12 +376,14 @@ include("connection.php");
           <h2>Harvest Records</h2>
           <p class="page-subtitle">Calculate harvest profits</p>
         </div>
-        <button class="btn btn-outline" onclick="printAllHarvests()">
-  <i class="fa-solid fa-print"></i> Print All
-</button>
-
-
-        <button class="btn btn-primary" onclick="openHarvestDialog()"><i class="fa-solid fa-plus"></i> Add Harvest</button>
+        <div class="page-actions">
+  <button class="btn btn-outline" onclick="printAllHarvests()">
+    <i class="fa-solid fa-print"></i> Print All
+  </button>
+  <button class="btn btn-primary" onclick="openHarvestDialog()">
+    <i class="fa-solid fa-plus"></i> Add Harvest
+  </button>
+</div>
       </div>
       <div id="harvests-list">
         <!-- Search bar -->
@@ -424,11 +430,14 @@ include("connection.php");
           <h2>Feedstocks</h2>
           <p class="page-subtitle">Record feeds availability or stocks</p>
         </div>
-        <button class="btn btn-outline" onclick="printTransactions()">
-  <i class="fa-solid fa-print"></i> Print All
-</button>
-
-        <button class="btn btn-primary" onclick="openTransactionDialog()"><i class="fa-solid fa-plus"></i> Add Transaction</button>
+        <div class="page-actions">
+  <button class="btn btn-outline" onclick="printTransactions()">
+    <i class="fa-solid fa-print"></i> Print All
+  </button>
+  <button class="btn btn-primary" onclick="openTransactionDialog()">
+    <i class="fa-solid fa-plus"></i> Add Transaction
+  </button>
+</div>
       </div>
       
       <div id="transactions-list">
