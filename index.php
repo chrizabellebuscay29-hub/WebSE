@@ -208,6 +208,41 @@ include("connection.php");
   display: inline-block;
 }
 
+/* Zebra striping for Expenses table */
+#expenses-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+#expenses-table tbody tr:nth-child(even) {
+  background-color: #688ce779;
+}
+/* Optional hover effect */
+#harvests-table tbody tr:hover {
+  background-color: #1c344e80;
+}
+
+/* Zebra striping for harvests table */
+#harvests-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+#harvests-table tbody tr:nth-child(even) {
+  background-color: #688ce779;
+}
+/* Optional hover effect */
+#harvests-table tbody tr:hover {
+  background-color: #1c344e80;
+}
+
+/* Zebra striping for Expenses table */
+#transactions-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+#transactions-table tbody tr:nth-child(even) {
+  background-color: #688ce779;
+}
+/* Optional hover effect */
+#transactions-table tbody tr:hover {
+  background-color: #1c344e80;
+}
 
 </style>
 
@@ -318,7 +353,7 @@ include("connection.php");
 
         <!-- Expenses Table -->
 <table id="expenses-table" border="1" cellpadding="8" cellspacing="0" style="width:100%; background:white; border-collapse: collapse;">
-  <thead style="background:#4f7fe9; color:white;">
+  <thead style="background:#0c3faf; color:white;">
     <tr>
       <th>Fisherman</th>
       <th>Type of Feeds</th>
@@ -330,7 +365,7 @@ include("connection.php");
   </thead>
   <tbody></tbody>
   <tfoot>
-    <tr style="background:#e9f0ff;">
+    <tr style="background:#9fc1e0;">
       <td colspan="4" style="text-align:right; font-weight:bold;">Total:</td>
       <td id="total-expenses-sum" style="font-weight:bold;">₱0.00</td>
       <td></td>
@@ -363,7 +398,7 @@ include("connection.php");
 
 <!-- Harvests Table -->
 <table id="harvests-table" border="1" cellpadding="8" cellspacing="0" style="width:100%; background:white; border-collapse: collapse;">
-  <thead style="background:#4f7fe9; color:white;">
+  <thead style="background:#0c3faf; color:white;">
     <tr>
       <th>Fisherman</th>
       <th>Kilo of Fish</th>
@@ -413,7 +448,7 @@ include("connection.php");
 
 <!-- Feedstocks Table -->
 <table id="transactions-table" border="1" cellpadding="8" cellspacing="0" style="width:100%; background:white; border-collapse: collapse;">
-  <thead style="background:#4f7fe9; color:white;">
+  <thead style="background:#0c3faf; color:white; ">
     <tr>
       <th>Name of Feeds</th>
       <th>Price per Piece</th>
