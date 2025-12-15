@@ -473,6 +473,68 @@
     .empty-state{ color:var(--muted); padding:12px; text-align:center; }
     .expense-search { display:inline-block; }
 
+    /*for workers slider*/
+.workers-slider-wrapper {
+overflow: hidden;
+position: relative;
+padding: 0 50px;
+}
+
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.slider-btn.prev {
+  left: 5px;
+}
+.slider-btn.next {
+  right: 5px;
+}
+.slider-btn:hover {
+  background: #0066ff87;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.workers-slider {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.workers-slider::-webkit-scrollbar {
+  display: none;
+}
+
+#workers-list > * {
+  flex: 0 0 calc((100% - 32px) / 3);
+}
+
+@media (max-width: 1023px) {
+  #workers-list > * {
+    flex: 0 0 calc((100% - 16px) / 2);
+  }
+}
+
+@media (max-width: 767px) {
+  #workers-list > * {
+    flex: 0 0 100%;
+  }
+}
   </style>
 </head>
 
@@ -536,22 +598,41 @@
       </div>
     </div>
 
-    <!-- Workers -->
-    <div id="workers" class="tab-content"> 
-      <div class="page-header">
-        <div>
-          <h2>Workers Management</h2>
-          <p class="page-subtitle">Manage your fishing crew members</p>
-        </div>
+   <!-- Workers -->
+<div id="workers" class="tab-content">
 
-        <button class="btn btn-primary" onclick="openWorkerDialog()">
-          <i class="fa-solid fa-plus"></i> Add Worker
-        </button>
-      </div>
-
-      <!-- Workers Grid -->
-      <div id="workers-list" class="workers-grid"></div>
+  <div class="page-header">
+    <div>
+      <h2>Workers Management</h2>
+      <p class="page-subtitle">Manage your fishing crew members</p>
     </div>
+
+    <button class="btn btn-primary" onclick="openWorkerDialog()">
+      <i class="fa-solid fa-plus"></i> Add Worker
+    </button>
+  </div>
+
+  <!-- 🔍 WORKER SEARCH (DITO TALAGA) -->
+  <div style="margin-bottom: 15px;">
+    <input
+      type="text"
+      id="worker-search"
+      class="input"
+      placeholder="Search worker..."
+      style="width: 300px; padding: 8px;"
+    />
+  </div>
+
+  <!-- ⬇️ Workers Slider -->
+  <div class="workers-slider-wrapper">
+    <button class="slider-btn prev">&#10094;</button>
+
+    <div id="workers-list" class="workers-slider"></div>
+
+    <button class="slider-btn next">&#10095;</button>
+  </div>
+
+</div>
 
     <!-- Expenses -->
     <div id="expenses" class="tab-content">
@@ -579,23 +660,68 @@
           <button class="btn btn-primary" onclick="loadExpenses()">Search</button>
         </div>
 
-        <div class="form-group" style="margin-top:10px;">
-          <label style="font-weight:600; color:#082E76;">
-            Total Expenses
-          </label>
-          <input
-            type="text"
-            id="expense-total"
-            class="input"
-            readonly
-            value="₱0.00"
-            style="
-              background:#f8fafc;
-              font-weight:600;
-              color:#082E76;
-            "
-          >
-        </div>
+        
+ <div class="form-group" style="margin-top:10px;"> <label style="font-weight:600; color:#082E76;"> Total Expenses </label>
+  <input
+    type="text"
+    id="expense-total"
+    class="input"
+    readonly
+    value="₱0.00"
+   
+  >
+  <button class="btn btn-primary" onclick="sendTotalToHarvest()" >
+    Use in Harvest
+  </button>
+</div>
+<style>
+.form-group {
+  position: relative; /* allow absolute positioning of button */
+  display: flex;      /* align label and input horizontally */
+  align-items: flex-start; /* align items at the top */
+  gap: 8px;           /* space between label and input */
+  margin-top: 10px;
+}
+
+#expense-total {
+  width: 1142px;        /* keep original size */
+  height: 34px;
+  padding: 4px 6px;
+  box-sizing: border-box;
+}
+
+.form-group button {
+  position: absolute;
+  top: 0;              /* align to top of container */
+  right: 0;            /* right edge of container */
+  height: 28px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
+
+</style>
+<script>
+function sendTotalToHarvest() {
+  // Get the total expenses value
+  const total = document.getElementById('expense-total').value;
+
+  // Remove the currency symbol if needed, keeping only the number
+  const numericTotal = total.replace(/₱|,/g, '').trim();
+
+  // Set it to the Harvest modal input
+  const harvestInput = document.getElementById("harvest-feeds");
+  if(harvestInput){
+    harvestInput.value = numericTotal; // or keep "₱" if you want
+    // Optionally, open the harvest modal if not already open
+    // openHarvestModal(); // if you have a function like this
+   alert("Total expenses saved in Harvest field!"); // Show alert
+  } else {
+    alert("Harvest field not found!");
+  }
+}
+</script>
+
 
         <!-- Expenses Table -->
         <table id="expenses-table" border="0" cellpadding="8" cellspacing="0" style="width:100%;">
@@ -966,13 +1092,19 @@ function saveWorker() {
 
 
 
-// Delete worker
+// Delete worker 
 function deleteWorker(id) {
-  if (!confirm("Are you sure you want to delete this worker?")) return;
+  if (!confirm("Are you sure you want to delete this worker and all their records?")) return;
+
   fetch('workers_delete.php', {
     method: 'POST',
     body: new URLSearchParams({ id })
-  }).then(() => fetchWorkers());
+  })
+  .then(response => response.text()) // optional but safer
+  .then(() => {
+    fetchWorkers();     // refresh worker list
+    loadDashboard();    // refresh dashboard totals
+  });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -1714,6 +1846,54 @@ function loadDashboard() {
   window.computeExpenseTotalForName = fetchDatabaseTotalForName;
   window.updateExpenseTotalForName = updateTotalForName;
 })();
+
+</script>
+<script>
+  //slider sa workers
+  const slider = document.querySelector(".workers-slider");
+  const nextBtn = document.querySelector(".slider-btn.next");
+  const prevBtn = document.querySelector(".slider-btn.prev");
+
+  function getVisibleCount() {
+    const w = window.innerWidth;
+    if (w <= 767) return 1;
+    if (w <= 1023) return 2;
+    return 3;
+  }
+
+  function scrollPage(direction) {
+    const card = slider.querySelector(":scope > *");
+    if (!card) return;
+
+    const gap = 16;
+    const visible = getVisibleCount();
+    const amount = (card.offsetWidth + gap) * visible;
+
+    slider.scrollBy({
+      left: direction * amount,
+      behavior: "smooth"
+    });
+  }
+
+  nextBtn.onclick = () => scrollPage(1);
+  prevBtn.onclick = () => scrollPage(-1);
+
+
+  //search sa workers
+  const workerSearch = document.getElementById("worker-search");
+
+  workerSearch.addEventListener("input", function () {
+    const query = this.value.toLowerCase();
+    const workers = document.querySelectorAll("#workers-list > *");
+
+    workers.forEach(worker => {
+      const text = worker.innerText.toLowerCase();
+      worker.style.display = text.includes(query) ? "" : "none";
+    });
+
+    // reset scroll after search
+    slider.scrollTo({ left: 0 });
+  });
 </script>
 
 </body>
