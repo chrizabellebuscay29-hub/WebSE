@@ -792,27 +792,28 @@ function refreshFeedsData() {
     const formData = new FormData(expenseForm);
 
     fetch("addexpense.php", {
-      method: "POST",
-      body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        // ✅ Show receipt modal with response data
-        showReceipt(data.receiptData, "Expense Receipt");
-        closeExpenseDialog();
-        expenseForm.reset();
-        loadExpenses();       // refresh expense table
-        updateExpenseTotal();
-        refreshFeedsData();   // update dropdown and stock table
-      } else {
-        alert("❌ " + data.message);
-      }
-    })
-    .catch(err => {
-      console.error("Fetch Error:", err);
-      alert("Error: Could not connect to server.");
-    });
+  method: "POST",
+  body: formData
+})
+.then(res => res.json())
+.then(data => {
+  if (data.success) {
+    showReceipt(data.receiptData, "Expense Receipt");
+    closeExpenseDialog();
+    expenseForm.reset();
+
+    loadExpenses(currentExpensePage);     // ✅ refresh expenses
+    loadTransactions(currentTransactionPage); // ✅ refresh transactions (THIS FIXES IT)
+    refreshFeedsData();                   // ✅ refresh stock source
+
+  } else {
+    alert("❌ " + data.message);
+  }
+})
+.catch(err => {
+  console.error("Fetch Error:", err);
+  alert("Error: Could not connect to server.");
+});
   });
 });
 
@@ -893,21 +894,23 @@ function printAllExpenses() {
   fetch(`print_expense.php?search=${encodeURIComponent(searchValue)}`)
     .then(res => res.json())
     .then(rows => {
-      let html = `
-        <h2>Expenses Report</h2>
-        <table border="1" width="100%">
-          <tr>
-            <th>Fisherman</th>
-            <th>Feeds</th>
-            <th>Price</th>
-            <th>Qty</th>
-            <th>Total</th>
-            <th>Date</th>
-          </tr>
+      let tableHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Fisherman</th>
+              <th>Feeds</th>
+              <th>Price</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
       `;
 
       rows.forEach(e => {
-        html += `
+        tableHTML += `
           <tr>
             <td>${e.Fisherman}</td>
             <td>${e.TypeofFeeds}</td>
@@ -919,16 +922,12 @@ function printAllExpenses() {
         `;
       });
 
-      html += "</table>";
+      tableHTML += `</tbody></table>`;
 
-      const win = window.open("", "", "width=900,height=600");
-      win.document.write(html);
-      win.document.close();
-      win.print();
-      win.close();
-    })
-    .catch(err => console.error("Print expenses failed:", err));
+      printWithStandardLayout("Expenses Report", tableHTML);
+    });
 }
+
 
 function printAllHarvests() {
   const searchValue = document.getElementById("harvest-search").value;
@@ -936,27 +935,24 @@ function printAllHarvests() {
   fetch(`print_harvests.php?search=${encodeURIComponent(searchValue)}`)
     .then(res => res.json())
     .then(rows => {
-
       let tableHTML = `
-<h2>Harvest Report</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Fisherman</th>
-      <th>Kilo of Fish</th>
-      <th>Price/kilo</th>
-      <th>Subtotal</th>
-      <th>Similia</th>
-      <th>Feeds</th>
-      <th>Total Expenses</th>
-      <th>Profit</th>
-      <th>Divided Profit</th>
-      <th>Date</th>
-    </tr>
-  </thead>
-  <tbody>
-`;
-
+        <table>
+          <thead>
+            <tr>
+              <th>Fisherman</th>
+              <th>Kilo of Fish</th>
+              <th>Price/Kilo</th>
+              <th>Subtotal</th>
+              <th>Similia</th>
+              <th>Feeds</th>
+              <th>Total Expenses</th>
+              <th>Profit</th>
+              <th>Divided Profit</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
 
       rows.forEach(h => {
         tableHTML += `
@@ -977,82 +973,10 @@ function printAllHarvests() {
 
       tableHTML += `</tbody></table>`;
 
-
-      const win = window.open("", "", "width=1200,height=700");
-
-      win.document.write(`
-<html>
-<head>
-  <title>Harvest Report</title>
-  <style>
-    @media print {
-      @page {
-        size: landscape;
-        margin: 12mm;
-      }
-
-      body {
-        font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 10px;
-        color: #1f2937;
-      }
-
-      h2 {
-        text-align: center;
-        color: #082E76;
-        margin-bottom: 12px;
-        letter-spacing: 0.5px;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-
-      thead th {
-        background-color: #082E76;
-        color: #ffffff;
-        padding: 6px 4px;
-        border: 1px solid #082E76;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 9px;
-      }
-
-      tbody td {
-        border: 1px solid #d1d5db;
-        padding: 5px 4px;
-        text-align: center;
-        white-space: nowrap;
-      }
-
-      tbody tr:nth-child(even) {
-        background-color: #f3f6fb;
-      }
-
-      tbody tr:nth-child(odd) {
-        background-color: #ffffff;
-      }
-
-      td:last-child {
-        white-space: normal;
-      }
-    }
-  </style>
-</head>
-<body>
-  ${tableHTML}
-</body>
-</html>
-`);
-
-
-      win.document.close();
-      win.print();
-      win.close();
-    })
-    .catch(err => console.error("Print harvests failed:", err));
+      printWithStandardLayout("Harvest Report", tableHTML);
+    });
 }
+
 
 
 
@@ -1232,6 +1156,101 @@ function searchFisherman() {
 }
 
 
+
+  </script>
+  <script>
+    function printWithStandardLayout(title, tableHTML) {
+  const win = window.open('', '', 'width=1100,height=700');
+
+  win.document.write(`
+    <html>
+      <head>
+        <title>${title}</title>
+        <style>
+          body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #F3F9FF;
+            color: #082E76;
+            margin: 40px;
+          }
+
+          .report-container {
+            background: white;
+            border: 3px solid #2E549C;
+            border-radius: 12px;
+            padding: 25px 35px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+          }
+
+          h2 {
+            text-align: center;
+            color: #082E76;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2E549C;
+            padding-bottom: 8px;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+          }
+
+          th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+          }
+
+          th {
+            background-color: #2E549C;
+            color: white;
+          }
+
+          tfoot td {
+            background: #F3F9FF;
+            font-weight: bold;
+          }
+
+          .footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #515760;
+            margin-top: 25px;
+          }
+
+          @media print {
+            body {
+              background: white;
+              margin: 0;
+            }
+            .report-container {
+              border: none;
+              box-shadow: none;
+              padding: 0;
+            }
+            .footer {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+        <div class="report-container">
+          <h2>${title}</h2>
+          ${tableHTML}
+          <div class="footer">
+            Printed on ${new Date().toLocaleString()} by Fishing Operation Manager
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+
+  win.document.close();
+  win.print();
+}
 
   </script>
 </body>
