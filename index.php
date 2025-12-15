@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fishing Operation Manager</title>
+  <title>Fishing Operation Management</title>
 
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -546,8 +546,8 @@ padding: 0 50px;
         <div class="header-content">
           <i class="fa-solid fa-ship header-icon"></i>
           <div>
-            <h1>Fishing Operation Manager</h1>
-            <p class="header-subtitle">Track expenses, harvests & transactions.</p>
+            <h1>Fishing Operation Management</h1>
+            <p class="header-subtitle">Record workers and track expenses, harvests & feeds.</p>
           </div>
         </div>
         <div class="header-actions">
@@ -1846,6 +1846,20 @@ function loadDashboard() {
   window.computeExpenseTotalForName = fetchDatabaseTotalForName;
   window.updateExpenseTotalForName = updateTotalForName;
 })();
+
+// Keep correct tab active after redirect (e.g., ?tab=workers)
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get("tab");
+  if (tab) {
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
+    document.getElementById(tab)?.classList.add("active");
+    document.querySelector(`.nav-tab[data-tab="${tab}"]`)?.classList.add("active");
+  }
+});
+
+
 
 </script>
 <script>
