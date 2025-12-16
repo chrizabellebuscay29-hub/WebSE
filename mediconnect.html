@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>MediConnect Web App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- jQuery Mobile CSS & JS -->
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+/* ---------------- GLOBAL ---------------- */
+/* Remove all text shadows globally */
+* {
+    text-shadow: none !important;
+}
+
+html, body { 
+    height: 100%; 
+    margin: 0; 
+    padding: 0; 
+    font-family: "Poppins", sans-serif; 
+    color: #0077cc; 
+    }
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("C:/Users/Hi/Downloads/aagon.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    /* Blur and opacity overlay */
+    filter: blur(5px); /* subtle blur */
+    opacity: 1;      /* semi-transparent */
+    z-index: -1;       /* behind all content */
+}
+
+
+/* Hide all pages by default to prevent overlap */
+.ui-page {
+    display: none !important;
+    flex-direction: column;
+    min-height: 100vh !important;
+    width: 100% !important;
+    background: transparent !important;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+/* Show only active page */
+.ui-page-active {
+    display: flex !important;
+    flex-direction: column;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Content area fills remaining space between header and footer */
+.ui-content {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Sticky header and footer */
+[data-role="header"], .ui-header, [data-role="footer"], .ui-footer {
+    flex-shrink: 0;
+    width: 100% !important;
+    position: sticky !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+/* ---------- FIXED FULL-WIDTH HEADER ---------- */
+[data-role="header"], .ui-header {
+    background-color: rgba(0, 119, 204, 0.85) !important;
+    color: #ffffff !important;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 1rem 0;
+    min-height: 60px !important;
+    line-height: 1.2 !important;
+    width: 100% !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    border-bottom: 2px solid #005fa3;
+}
+
+/* ---------- FIXED FULL-WIDTH FOOTER ---------- */
+[data-role="footer"], .ui-footer {
+    background-color: rgba(0, 119, 204, 0.85) !important;
+    color: #ffffff !important;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    padding: 0.8rem 0;
+    min-height: 50px !important;
+    line-height: 1.2 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 -3px 10px rgba(0,0,0,0.2);
+    border-top: 2px solid #005fa3;
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 999 !important;
+}
+
+/* ---------- MEDIA QUERIES FOR SMALL SCREENS ---------- */
+@media screen and (max-width: 480px) {
+    [data-role="header"], .ui-header {
+        font-size: 1.2rem;
+        min-height: 50px !important;
+        padding: 0.6rem 0;
+    }
+
+    [data-role="footer"], .ui-footer {
+        font-size: 0.9rem;
+        min-height: 45px !important;
+        padding: 0.5rem 0;
+    }
+}
+
+/* ---------- MENU BUTTON CARDS ---------- */
+.menu-btn-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    max-width: 850px;
+    margin: 0 auto 40px auto;
+    justify-content: center;
+    justify-items: center;
+}
+
+.menu-btn {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 15px;
+    padding: 25px 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    cursor: pointer;
+    border: 1px solid rgba(0,119,204,0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    font-size: 20px;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 250px;
+    height: 120px;
+    box-sizing: border-box;
+} 
+
+
+.menu-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border-color: #0077cc;
+}
+
+/* ---------- BUTTONS ---------- */
+button {
+    width: 100%;
+    max-width: 350px;
+    padding: 14px;
+    background-color: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    margin: 12px 0;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+button:hover {
+    background-color: #005fa3;
+    transform: scale(1.03);
+}
+
+.back {
+    background-color: #a0a8b5;
+}
+
+.back:hover {
+    background-color: #7b8087;
+}
+
+/* ---------- INPUT & SELECT ---------- */
+input, select {
+    width: 100%;
+    max-width: 500px;
+    padding: 14px;
+    margin: 12px 0;
+    box-sizing: border-box;
+    border-radius: 12px;
+    border: 1px solid rgba(0,119,204,0.35);
+    font-size: 16px;
+    background: rgba(255,255,255,0.8);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #0d1a52;
+    transition: all 0.3s ease;
+    justify-content: center;
+}
+
+select {
+    width: 100%;
+    max-width: 500px;
+    padding: 14px;
+    margin: 12px 0;
+    box-sizing: border-box;
+    border-radius: 12px;
+    border: 1px solid rgba(0,119,204,0.35);
+    font-size: 16px;
+    background: rgba(255,255,255,0.8);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #0d1a52;
+    transition: all 0.3s ease;
+
+    /* Center selected value */
+    text-align: center;             /* fallback for most browsers */
+    text-align-last: center;        /* Chrome, Edge, IE */
+    -moz-text-align-last: center;   /* Firefox */
+    direction: ltr;                 /* ensures proper alignment */
+}
+
+/* Focus styles */
+input:focus, select:focus {
+    outline: none;
+    border-color: #0077cc;
+    box-shadow: 0 0 10px rgba(0, 119, 204, 0.5);
+    background: #ffffff;
+}
+
+/* Center selected text inside appointment selects (cross-browser) */
+#appointment select,
+#appointment select option {
+  text-align: center;           /* Chrome, Safari, Firefox (option) */
+  -moz-text-align-last: center; /* Firefox */
+  text-align-last: center;      /* IE/Edge */
+}
+
+/* Optional: narrower select centered in the grid cell */
+#appointment .form-grid select {
+  max-width: 320px;
+  margin: 0 auto;
+  display: block;
+}
+
+/* Center appointment form vertically & horizontally */
+#appointment .ui-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 110px);
+    padding: 20px;
+    box-sizing: border-box;
+    transition: padding 0.2s ease;
+}
+
+/* Responsive glass card */
+#appointment .glass-card {
+    width: 90%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 25px 20px;
+}
+
+/* Inputs and buttons responsive */
+#appointment input, #appointment select, #appointment button {
+    width: 100%;
+    max-width: 100%;
+    font-size: 16px;
+    padding: 12px;
+}
+
+/* Date & Time side by side */
+.datetime-container {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 12px;
+}
+.datetime-container div {
+    flex: 1;
+}
+.datetime-container input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,119,204,0.3);
+    font-size: 16px;
+    background: rgba(255,255,255,0.6);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+    backdrop-filter: blur(6px);
+}
+
+/* ================== APPOINTMENT FORM – PROFESSIONAL ================== */
+#appointment .glass-card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+}
+
+/* Section title */
+#appointment .section-title {
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 25px;
+    color: #0077cc;
+}
+
+/* Form grid */
+#appointment .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 18px;
+    width: 100%;
+}
+
+/* Full-width rows */
+#appointment .full {
+    grid-column: span 2;
+}
+
+/* Labels */
+#appointment label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Inputs & selects */
+#appointment input,
+#appointment select {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,119,204,0.35);
+    background: rgba(255,255,255,0.85);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* Focus effect */
+#appointment input:focus,
+#appointment select:focus {
+    outline: none;
+    border-color: #0077cc;
+    box-shadow: 0 0 0 2px rgba(0,119,204,0.2);
+}
+
+/* Buttons */
+#appointment button {
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 14px;
+}
+
+/* Stack on mobile */
+@media (max-width: 600px) {
+    #appointment .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #appointment .full {
+        grid-column: span 1;
+    }
+}
+
+/* ---------- GLASS CARD ---------- */
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    margin: 40px 0;
+}
+
+/* ---------- SECTION TITLES ---------- */
+.section-title {
+    font-weight: 700;
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: #0077cc; 
+    text-align: center;
+}
+
+
+/* ---------- ILLNESS GRID ---------- */
+.illness-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    margin-bottom: 30px;
+}
+@media screen and (max-width: 480px) {
+    .illness-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.illness-card {
+    padding: 25px;
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(8px);
+    border-radius: 15px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    border-left: 5px solid #0077cc;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.illness-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.illness-icon {
+    width: 65px;
+    height: 65px;
+    background-color: #e6f0ff;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    transition: all 0.3s ease;
+}
+.illness-card:hover .illness-icon {
+    background-color: #0077cc;
+    color: white;
+}
+
+/* ---------- ILLNESS GUIDE BUTTONS HORIZONTAL ---------- */
+#illness .ui-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#illness .ui-content .buttons-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+#illness .ui-content .buttons-container button {
+    max-width: 300px;
+    flex: 1;
+}
+
+/* ---------- HISTORY BOX ---------- */
+.history-box {
+    padding: 20px;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(8px);
+    border-left: 6px solid #0077cc;
+    border-radius: 15px;
+    margin-bottom: 18px;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.history-box.Pending { border-left-color: #ff9900; }
+.history-box.Completed { border-left-color: #28a745; }
+
+/* ---------- ABOUT CARDS ---------- */
+.about-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+.about-card {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(8px);
+    border-radius: 15px;
+    text-align: center;
+    padding: 25px;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+.about-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+.about-icon {
+    font-size: 42px;
+    margin-bottom: 15px;
+}
+
+/* ---------- USER PROFILE CARD ---------- */
+.user-card {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.user-avatar {
+    width: 100px;
+    height: 100px;
+    background-color: #0077cc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    color: white;
+    transition: transform 0.4s ease;
+}
+.user-card:hover .user-avatar {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Profile Quick Shortcuts Container */
+#profile .shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+#profile .shortcut-btn {
+    background-color: #0077cc;
+    color: white;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    min-width: 140px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+#profile .shortcut-btn:hover {
+    background-color: #005fa3;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+@media screen and (max-width: 480px) {
+    #profile .shortcut-btn {
+        min-width: 100px;
+        font-size: 14px;
+        padding: 12px 16px;
+    }
+}
+
+/* ---------- QUEUE CARD ---------- */
+#queueInfo {
+    max-width: 500px;
+    margin: 25px auto;
+    padding: 28px 25px;
+    border-radius: 15px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0,119,204,0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    text-align: center;
+    font-size: 18px;
+}
+
+/* ---------------- ADMIN PANEL ---------------- */
+#admin table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px);
+}
+#admin thead th {
+    background-color: #0077cc;
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+}
+#admin tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(0,119,204,0.2);
+}
+#admin tr:hover td {
+    background-color: rgba(0, 119, 204, 0.05);
+}
+#admin button {
+    margin: 10px 5px 20px 0;
+    padding: 12px 18px;
+    font-size: 16px;
+    border-radius: 12px;
+}
+
+/* Highlight for current patient row */
+.current-row {
+    background: linear-gradient(90deg, rgba(0,127,204,0.08), rgba(0,127,204,0.03));
+    border-left: 6px solid #0077cc;
+    transition: background 0.3s ease, transform 0.15s ease;
+    transform: translateX(0);
+}
+.current-row td {
+    font-weight: 700;
+}
+
+/* Unique highlight animation: glow slide + soft pop */
+.current-row.highlight {
+    animation: glowSlide 1000ms cubic-bezier(.2,.9,.2,1) both, popScale 420ms ease both;
+    box-shadow: 0 10px 30px rgba(0,127,204,0.12);
+}
+@keyframes glowSlide {
+    0% {
+        transform: translateX(-18px) scale(0.985);
+        box-shadow: 0 0 0 rgba(0,127,204,0);
+        filter: blur(0);
+    }
+    40% {
+        transform: translateX(6px) scale(1.03);
+        box-shadow: 0 6px 26px rgba(0,127,204,0.35);
+        filter: blur(.2px);
+    }
+    100% {
+        transform: translateX(0) scale(1);
+        box-shadow: 0 6px 18px rgba(0,127,204,0.18);
+    }
+}
+@keyframes popScale {
+    0% { transform: scale(0.98); }
+    60% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+}
+
+/* subtle pulse for persistently highlighted row (keeps it noticeable) */
+.current-row::after{
+    content: "";
+    display:block;
+    position:absolute;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+    pointer-events:none;
+    border-radius:4px;
+    opacity:0;
+    transition: opacity .25s ease;
+}
+.current-row.pulse::after {
+    animation: softPulse 1800ms ease-in-out infinite;
+    opacity: 1;
+}
+@keyframes softPulse {
+    0% { box-shadow: 0 0 0 0 rgba(0,127,204,0.12); }
+    50% { box-shadow: 0 0 30px 6px rgba(0,127,204,0.06); }
+    100% { box-shadow: 0 0 0 0 rgba(0,127,204,0.02); }
+}
+
+/* Page cards animation helper */
+.glass-card, .about-card, .illness-card, .user-card {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.5s ease;
+}
+.anim-visible {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* small interaction animations */
+.menu-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    transition: transform 0.4s ease, color 0.4s ease;
+}
+.menu-btn:hover .menu-icon {
+    transform: scale(1.3) rotate(10deg);
+    color: #005fa3;
+}
+button#submitApp {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.08);}
+    50% { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.15);}
+    100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.08);}
+}
+
+button, .menu-btn, .shortcut-btn {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+button:hover, .menu-btn:hover, .shortcut-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+/* Login-specific styles (improved) */
+#login .ui-content {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px;
+    min-height: calc(100vh - 110px);
+}
+#login .glass-card {
+    width: 90%;
+    max-width: 450px;
+    padding: 35px;
+    margin: 0 auto !important;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.2); /* more transparent */
+    backdrop-filter: blur(18px); /* keeps the glass effect */
+    -webkit-backdrop-filter: blur(18px); /* for Safari */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); /* lighter shadow */
+    border: 1px solid rgba(0, 119, 204, 0.05); /* subtle border */
+}
+
+#login .section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0077cc;
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+#login label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0d1a52;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    display: block;
+}
+#login input:focus {
+    border-color: #0077cc;
+    box-shadow: 0 0 0 3px rgba(0, 119, 204, 0.4);
+    background: #ffffff;
+    outline: none;
+}
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+.password-wrapper input {
+    width: 100%;
+    padding-right: 45px;
+}
+.toggle-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #555;
+    font-size: 18px;
+}
+#login button {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px;
+    font-size: 19px;
+    font-weight: 600;
+    margin: 30px 0 10px 0;
+    border-radius: 14px;
+    background-color: #0077cc;
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+#login button:hover {
+    background-color: #005fa3;
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+}
+
+#heartbeatCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* behind all content */
+    pointer-events: none; /* clicks pass through */
+    background: transparent;
+}
+
+</style>
+<style>
+    /* ============================================================
+   🔥 ABSOLUTE GLOBAL RESPONSIVE OVERRIDE
+   Applies to EVERYTHING without altering your structure
+============================================================ */
+
+/* 1️⃣ UNIVERSAL BOX & SCALE CONTROL */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+/* 2️⃣ ROOT SCALING SYSTEM */
+html {
+    font-size: clamp(14px, 1.1vw, 18px);
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* 3️⃣ CANVAS ALWAYS FITS SCREEN */
+#heartbeatCanvas {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 4️⃣ ALL IMAGES / ICONS / MEDIA */
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 5️⃣ HEADERS & FOOTERS SCALE */
+[data-role="header"],
+[data-role="footer"] {
+    font-size: clamp(1rem, 2.2vw, 1.5rem) !important;
+    padding-inline: clamp(10px, 3vw, 25px);
+}
+
+/* 6️⃣ CONTENT AREA FLEX SAFETY */
+.ui-content {
+    width: 100%;
+    max-width: 100%;
+    padding: clamp(12px, 3vw, 30px) !important;
+}
+
+/* 7️⃣ GLASS CARDS — AUTO SCALE */
+.glass-card,
+.about-card,
+.illness-card,
+.user-card,
+.history-box,
+#queueInfo {
+    width: 100%;
+    max-width: min(600px, 95vw);
+    padding: clamp(14px, 3vw, 30px);
+    margin-inline: auto;
+}
+
+/* 8️⃣ BUTTONS — TOUCH FRIENDLY */
+button,
+.menu-btn,
+.shortcut-btn,
+.badge-btn {
+    width: 100%;
+    max-width: min(350px, 95vw);
+    font-size: clamp(14px, 3.2vw, 18px);
+    padding: clamp(12px, 3vw, 16px);
+    margin-inline: auto;
+}
+
+/* 9️⃣ FORMS — INPUTS & SELECTS */
+input,
+select,
+textarea {
+    width: 100% !important;
+    max-width: min(500px, 95vw) !important;
+    font-size: clamp(14px, 3vw, 16px);
+}
+
+/* 10️⃣ FORM GRID AUTO COLLAPSE */
+.form-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+}
+
+/* 11️⃣ MENU GRID AUTO RESPONSIVE */
+.menu-btn-container {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    width: 100%;
+}
+
+/* 12️⃣ ILLNESS GRID AUTO FLOW */
+.illness-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+}
+
+/* 13️⃣ PROFILE CARD AUTO STACK */
+.user-card {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+}
+
+/* 14️⃣ ADMIN TABLE RESPONSIVE (NO BREAKING) */
+#admin table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+#admin th,
+#admin td {
+    font-size: clamp(13px, 2.5vw, 16px);
+}
+
+/* 15️⃣ TEXT RESPONSIVENESS */
+h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+h2 { font-size: clamp(1.4rem, 3.5vw, 2rem); }
+h3 { font-size: clamp(1.2rem, 3vw, 1.6rem); }
+p, li, label {
+    font-size: clamp(0.9rem, 2.8vw, 1rem);
+}
+
+/* 16️⃣ FLOATING ELEMENTS SAFE */
+.float-shape,
+.menu-icon,
+.illness-icon,
+.about-icon,
+.user-avatar {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 17️⃣ PAGE SAFETY — NO OVERFLOW */
+.ui-page {
+    width: 100vw !important;
+    overflow-x: hidden !important;
+}
+
+/* 18️⃣ SMALL DEVICES */
+@media (max-width: 480px) {
+
+    [data-role="header"],
+    [data-role="footer"] {
+        font-size: 1rem !important;
+    }
+
+    button,
+    .menu-btn {
+        max-width: 100%;
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 40px;
+    }
+}
+
+
+/* =====================================================
+   🔐 LOGOUT BUTTON — UNDER "WELCOME TO MEDICONNECT"
+   (NO OVERLAP, CONTENT FLOW, MOBILE ONLY)
+===================================================== */
+
+@media (max-width: 600px) {
+
+    /* Disable floating behavior */
+    #logoutBtn {
+        position: static !important;   /* 🔥 stops overlap */
+        display: block;
+        width: 100%;
+        max-width: 260px;
+        margin: -15px auto 25px;       /* pulls it under the title */
+        text-align: center;
+        z-index: auto;
+    }
+
+    /* Ensure content stacks properly */
+    [data-role="content"] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Title spacing */
+    [data-role="content"] h2 {
+        margin-bottom: 20px;
+    }
+}
+
+
+</style>
+</head>
+
+<body>
+
+   <canvas id="heartbeatCanvas"></canvas>
+
+<script>
+  const canvas = document.getElementById('heartbeatCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class HeartbeatLine {
+    constructor(y, speed, color) {
+        this.y = y;
+        this.speed = speed;
+        this.color = color;
+        this.points = [];
+        this.x = 0;
+        this.direction = 1; // 1 = right, -1 = left
+    }
+
+    addPoint() {
+        const spikeInterval = 100; 
+        const spikeHeight = 50;
+        const baseline = this.y;
+
+        let newY = baseline;
+        if (Math.floor(this.x) % spikeInterval === 0) {
+            this.points.push({x: this.x - 10, y: baseline, alpha: 1});
+            this.points.push({x: this.x, y: baseline - spikeHeight, alpha: 1});
+            this.points.push({x: this.x + 10, y: baseline, alpha: 1});
+        } else {
+            this.points.push({x: this.x, y: baseline, alpha: 1});
+        }
+
+        // remove points off screen
+        while (this.points.length > 0 && (this.points[0].x < this.x - canvas.width || this.points[0].x > this.x + canvas.width)) {
+            this.points.shift();
+        }
+
+        // update position
+        this.x += this.speed * this.direction;
+
+        // reverse direction at edges
+        if(this.x > canvas.width || this.x < 0) this.direction *= -1;
+    }
+
+    draw() {
+        for (let i = 1; i < this.points.length; i++) {
+            const p0 = this.points[i-1];
+            const p1 = this.points[i];
+
+            p0.alpha *= 0.96;
+            p1.alpha *= 0.96;
+
+            ctx.beginPath();
+            ctx.moveTo(p0.x, p0.y);
+            ctx.lineTo(p1.x, p1.y);
+            ctx.strokeStyle = `rgba(0,119,204,${p1.alpha})`;
+            ctx.lineWidth = 2;
+            ctx.shadowColor = `rgba(0,119,204,${p1.alpha*0.4})`;
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+    }
+}
+
+// Create multiple heartbeat lines
+const lines = [
+    new HeartbeatLine(canvas.height*0.3, 2, 'blue'),
+    new HeartbeatLine(canvas.height*0.5, 3, 'blue'),
+    new HeartbeatLine(canvas.height*0.7, 1.5, 'blue')
+];
+
+function animateHeartbeat() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    lines.forEach(line => {
+        line.addPoint();
+        line.draw();
+    });
+    requestAnimationFrame(animateHeartbeat);
+}
+
+animateHeartbeat();
+
+
+</script>
+
+
+<!-- ================== Animation helper (uses CSS transitions instead of jQuery animate for transform) ================== -->
+<script>
+    // Simple page show animation: add .anim-visible to cards inside the active page
+    $(document).on("pagebeforeshow", ".ui-page", function() {
+        const $page = $(this);
+        $page.find(".glass-card, .about-card, .illness-card, .user-card").each(function(i){
+            const el = $(this);
+            el.removeClass("anim-visible");
+            setTimeout(function(){
+                el.addClass("anim-visible");
+            }, 120 * i);
+        });
+    });
+
+    $(document).on("pagebeforehide", ".ui-page", function() {
+        $(this).find(".glass-card, .about-card, .illness-card, .user-card").removeClass("anim-visible");
+    });
+</script>
+
+<!-- ================== LOGIN PAGE ================== -->
+<div data-role="page" id="login">
+    <div data-role="header">
+        MediConnect Login
+    </div>
+
+    <div data-role="content" class="glass-card">
+        <div class="section-title">Login</div>
+
+        <form id="userLoginForm">
+            <label for="username">Username/Email:</label>
+            <input type="text" id="username" placeholder="Enter username or email" required>
+
+            <label for="password">Password:</label>
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Enter password" required>
+                <span id="toggleLoginPass" class="toggle-password">
+                    <i class="fa-solid fa-eye"></i>
+                </span>
+            </div>
+
+            <button type="submit" id="loginBtn"> Login</button>
+        </form>
+    </div>
+
+    <div data-role="footer">
+        © 2024 MediConnect
+    </div>
+</div>
+
+<script>
+    // Global session flag
+    let isAdminSession = false;
+
+    // toggle login password visibility
+    $('#toggleLoginPass').on('click', function() {
+        var passwordField = $('#password');
+        var icon = $(this).find('i');
+
+        if (passwordField.attr('type') === 'password') {
+            passwordField.attr('type', 'text');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            passwordField.attr('type', 'password');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+
+    // Login check for both user and admin
+    $("#userLoginForm").on("submit", function(e){
+        e.preventDefault();
+
+        const username = $("#username").val().trim();
+        const password = $("#password").val().trim();
+
+        if(!username || !password){
+            alert("Please complete all fields.");
+            return;
+        }
+
+        // Example credentials
+        const credentials = {
+            admin: { username: "admin", password: "1234" },
+            user: { username: "user", password: "user123" }
+        };
+
+        if(username === credentials.admin.username && password === credentials.admin.password){
+            // admin login
+            isAdminSession = true;
+            $.mobile.changePage("#admin");
+            $("#adminLoginForm").hide();
+            $("#adminContent").show();
+        }
+        else if(username === credentials.user.username && password === credentials.user.password){
+            // normal user login
+            isAdminSession = false;
+            $.mobile.changePage("#home");
+            $(".menu-btn[data-target='admin']").hide();
+
+            // Update profile name and welcome message
+            $("#profileName").text("MediConnect " + username);
+            if ($("#welcomeMsg").length === 0) {
+                $(".menu-btn-container").prepend(`<h2 id="welcomeMsg" style="text-align:center; color:#0d1a52; grid-column: 1 / -1;">Welcome, ${username}!</h2>`);
+            } else {
+                $("#welcomeMsg").text(`Welcome, ${username}!`);
+            }
+        }
+        else {
+            alert("Invalid username or password!");
+            return;
+        }
+
+        // Clear login fields
+        $("#username, #password").val("");
+    });
+</script>
+
+<!-- ================== HOME PAGE ================== -->
+<div data-role="page" id="home">
+    <div data-role="header">
+        Home
+    </div>
+
+    <!-- FLOATING SHAPES -->
+    <div class="float-shape shape1"></div>
+    <div class="float-shape shape2"></div>
+    <div class="float-shape shape3"></div>
+    <div class="float-shape shape4"></div>
+
+    <div data-role="content" style="position: relative;">
+        <h2 style="text-align:center; font-size:28px; margin:0 0 30px 0; color:#0077cc;">
+            Welcome to MediConnect!
+        </h2>
+
+        <div class="menu-btn-container">
+            <div class="menu-btn" data-target="appointment" data-transition="slide">
+                <div class="menu-icon">📅</div>
+                <b>Set Appointment</b>
+            </div>
+            <div class="menu-btn" data-target="illness" data-transition="fade">
+                <div class="menu-icon">🩺</div>
+                <b>Illness Guide</b>
+            </div>
+            <div class="menu-btn" data-target="about" data-transition="pop">
+                <div class="menu-icon">ℹ️</div>
+                <b>About</b>
+            </div>
+            <div class="menu-btn" data-target="profile" data-transition="flip">
+                <div class="menu-icon">👤</div>
+                <b>Profile</b>
+            </div>
+            <div class="menu-btn" data-target="queue" data-transition="slidefade">
+                <div class="menu-icon">📢</div>
+                <b>Queue Tracker</b>
+            </div>
+            <div class="menu-btn" data-target="admin" data-transition="slideup">
+                <div class="menu-icon">🛠️</div>
+                <b>Admin Panel</b>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout button floating separately in top-right corner -->
+    <a href="#" id="logoutBtn" 
+       style="position: absolute; top:70px; right:20px; background:#d9534f; color:white; 
+              padding:10px 12px; border-radius:8px; text-decoration:none; z-index:1000;">
+       🚪 Logout
+    </a>
+
+    <div data-role="footer">
+        © 2024 MediConnect
+    </div>
+</div>
+
+<script>
+    // initial hide admin button if not admin
+    $(document).on("pagecreate", function() {
+        if (!isAdminSession) $(".menu-btn[data-target='admin']").hide();
+    });
+
+    $("#logoutBtn").click(function(e){
+        e.preventDefault();
+        isAdminSession = false;
+        $("#userLoginForm")[0].reset();
+        $("#adminLoginForm").show();
+        $("#adminContent").hide();
+        // remove welcome message if exists
+        $("#welcomeMsg").remove();
+        $.mobile.changePage("#login");
+    });
+</script>
+
+<!-- ================== ABOUT PAGE ================== -->
+<div data-role="page" id="about">
+    <div data-role="header">
+        MediConnect
+    </div>
+    <div data-role="content">
+        <div class="section-title">About MediConnect</div>
+       <p style="font-size:25px; color:white; text-align: center;">
+    MediConnect helps users easily access healthcare services through fast appointments and illness information.
+</p>
+
+
+        <div class="about-cards">
+            <div class="about-card">
+                <div class="about-icon">🎯</div>
+                <h3>Our Mission</h3>
+                <p style="font-size:15px; color:black;">
+                    To simplify healthcare access with technology, making appointments and guidance faster and easier for everyone.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-icon">👁️‍🗨️</div>
+                <h3>Our Vision</h3>
+                <p style="font-size:15px; color:black;">
+                    To become the most trusted digital companion for personal health, empowering users with knowledge and convenience.</p>
+            </div>
+            <div class="about-card">
+                <div class="about-icon">💡</div>
+                <h3>Key Benefits</h3>
+                <ul style="font-size:30px; color:black; line-height:1.6; margin:10px 0; padding-left:20px; ">
+                    <li> Fast appointment scheduling</li>
+                    <li>Reliable illness guide</li>
+                    <li> Personal health dashboard</li>
+                </ul>
+            </div>
+        </div>
+
+        <button class="back" style="margin-top:30px;" data-target="home">⬅ Back to Home</button>
+    </div>
+    <div data-role="footer">
+        © 2024 MediConnect
+    </div>
+</div>
+
+<!-- ================== ILLNESS GUIDE PAGE ================== -->
+<div data-role="page" id="illness">
+    <div data-role="header">
+        MediConnect
+    </div>
+    <div data-role="content">
+        <div class="section-title">Illness Guide</div>
+        <div class="illness-grid">
+            <div class="illness-card">
+                <div class="illness-icon">🤒</div>
+                <div><b>Fever</b><br>High temperature & weakness.</div>
+            </div>
+            <div class="illness-card">
+                <div class="illness-icon">🤧</div>
+                <div><b>Cold & Flu</b><br>Cough, runny nose, fever.</div>
+            </div>
+            <div class="illness-card">
+                <div class="illness-icon">😵</div>
+                <div><b>Migraine</b><br>Headache & light sensitivity.</div>
+            </div>
+            <div class="illness-card">
+                <div class="illness-icon">🐍</div>
+                <div><b>Animal Bites</b><br>Snake, dog, or insect bites.</div>
+            </div>
+            <div class="illness-card">
+                <div class="illness-icon">🤰</div>
+                <div><b>Pregnancy</b><br>Routine checkups & care.</div>
+            </div>
+            <div class="illness-card">
+                <div class="illness-icon">🤕</div>
+                <div><b>Injury</b><br>Cuts, bruises, sprains.</div>
+            </div>
+            <div class="illness-card">
+                <div class="illness-icon">🤮</div>
+                <div><b>Food Poisoning</b><br>Nausea, vomiting, diarrhea.</div>
+            </div>
+        </div>
+
+       <div class="buttons-container">
+            <button class="menu-btn" data-target="appointment">📅 Book Appointment</button>
+            <button class="back" data-target="home">⬅ Back to Home</button>
+        </div>
+    </div>
+    <div data-role="footer">
+        © 2024 MediConnect
+    </div>
+</div>
+
+<!-- ================== APPOINTMENT PAGE ================== -->
+<div data-role="page" id="appointment">
+    <div data-role="header">
+        MediConnect
+    </div>
+    <div data-role="content" class="glass-card">
+        <div class="section-title">Appointment Form</div>
+
+        <div class="form-grid">
+            <div>
+                <label>Full Name</label>
+                <input type="text" id="name" placeholder="Full Name">
+            </div>
+
+            <div>
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="example@email.com" required>
+            </div>
+
+            <div>
+                <label>Contact Number</label>
+                <input type="text" id="contact" placeholder="09XXXXXXXXX">
+            </div>
+
+            <div>
+                <label>Illness / Concern</label>
+                <select id="illnessSelect">
+                    <option value="">Select Illness</option>
+                    <option>Fever</option>
+                    <option>Cold & Flu</option>
+                    <option>Migraine</option>
+                    <option>Animal Bites</option>
+                    <option>Pregnancy</option>
+                    <option>Injury</option>
+                    <option>Food Poisoning</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Barangay</label>
+                <select id="barangaySelect">
+                    <option value="">Select Barangay</option>
+                    <option>Adia</option>
+                    <option>Bagong Sikat</option>
+                    <option>Balangon</option>
+                    <option>Banyaga</option>
+                    <option>Bilibinwang</option>
+                    <option>Bangin</option>
+                    <option>Barigon</option>
+                    <option>Coral na Munti</option>
+                    <option>Guitna</option>
+                    <option>Mabini</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Appointment Date</label>
+                <input type="date" id="date">
+            </div>
+
+            <div>
+                <label>Appointment Time</label>
+                <input type="time" id="time">
+            </div>
+        </div>
+
+        <button id="submitApp">Submit Appointment</button><br>
+        <button id="resetForm" class="back">Reset</button><br>
+        <button class="back" data-target="home">⬅ Back to Home</button>
+    </div>
+    <div data-role="footer">
+        © 2024 MediConnect
+    </div>
+</div>
+
+<script>
+$(document).on("pageinit", "#appointment", function() {
+    // Allow only digits and stop typing at 11 digits
+    $("#contact").on("input", function() {
+        // Remove non-digits
+        this.value = this.value.replace(/\D/g, "");
+
+        // Trim to max 11 digits
+        if (this.value.length > 11) {
+            this.value = this.value.slice(0, 11);
+        }
+    })
+});
+    </script>
+
+<!-- ================== PROFILE PAGE ================== -->
+<div data-role="page" id="profile">
+    <div data-role="header">
+        MediConnect
+    </div>
+    <div data-role="content">
+        <div class="section-title">Profile / Dashboard</div>
+
+        <div class="user-card">
+            <div class="user-avatar">👤</div>
+            <div>
+                <h3 id="profileName">MediConnect Banyaga</h3>
+                <p style="color:#233b94; font-weight:bold;">Email: mediconnectbanyaga@gmail.com</p>
+                <p>Contact: +63 917 123 4567</p>
+                <p><b>Member since:</b> February 2025</p>
+                <div class="badges">
+                    <button class="badge-btn" data-status="Completed">Completed: 0</button>
+                    <button class="badge-btn pending" data-status="Pending">Pending: 0</button>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="color:black;">Quick Shortcuts</h3>
+        <div class="shortcuts">
+            <div class="shortcut-btn" data-target="appointment">📅 Set Appointment</div>
+            <div class="shortcut-btn" data-target="illness">🩺 Illness Guide</div>
+            <div class="shortcut-btn" data-target="about">ℹ️ About</div>
+        </div>
+
+        <h3 style="color:black;">Appointment History</h3>
+        <div id="history"></div>
+
+        <button class="back" data-target="home">⬅ Back to Home</button>
+    </div>
+    <div data-role="footer">
+        © 2024 MediConnect
+    </div>
+</div>
+
+<!-- ================== QUEUE PAGE ================== -->
+<div data-role="page" id="queue">
+    <div data-role="header">
+       MediConnect
+    </div>
+    <div data-role="content">
+        <div class="section-title">Queue Tracker</div>
+        <div id="queueInfo" style="font-size: clamp(30px, 5vw, 40px); color:black;"></div>
+
+        <button id="refreshQueue">🔄 Refresh</button>
+        <button class="back" data-target="home">⬅ Back to Home</button>
+    </div>
+    <div data-role="footer">
+        © 2024 MediConnect
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const queueInfo = document.getElementById("queueInfo");
+    const refreshBtn = document.getElementById("refreshQueue");
+
+    // Function to load saved queue data
+    function loadQueueData() {
+        const savedQueue = localStorage.getItem("queueData") || "No queue data saved.";
+        queueInfo.innerHTML = savedQueue;
+    }
+
+    // Initial load
+    loadQueueData();
+
+    // Refresh button click
+    refreshBtn.addEventListener("click", function() {
+        loadQueueData();              // Reload saved data
+        alert("Queue data refreshed!"); // Show alert
+    });
+});
+</script>
+
+
+
+<!-- ================== ADMIN PAGE ================== -->
+<div data-role="page" id="admin">
+    <div data-role="header">
+        MediConnect
+    </div>
+
+    <div data-role="content">
+        <!-- LOGIN FORM -->
+        <div id="adminLoginForm">
+            <div class="section-title">Admin Login</div>
+            <label for="adminUser">Username:</label>
+            <input type="text" id="adminUser" placeholder="Enter username">
+
+            <label for="adminPass">Password:</label>
+            <div style="position:relative;">
+                <input type="password" id="adminPass" placeholder="Enter password" style="padding-right:30px;">
+                <span id="togglePass" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer;">
+                    👁️
+                </span>
+            </div>
+
+            <button id="adminLoginBtn">Login</button>
+        </div>
+
+        <!-- ADMIN CONTENT (hidden initially) -->
+        <div id="adminContent" style="display:none;">
+            <div class="section-title">Admin Panel</div>
+
+            <table aria-describedby="apptTableCaption">
+                <caption id="apptTableCaption" style="text-align:left; padding-top:8px;">Queued Appointments (current patient is highlighted)</caption>
+                <thead>
+                    <tr><th>Name</th><th>Service</th><th>Barangay</th><th>Queue #</th></tr>
+                </thead>
+                <tbody id="apptTable"></tbody>
+            </table>
+
+            <button id="btnNext">Next Patient</button>
+            <button id="btnReset" style="background:#d9534f">Reset Queue</button>
+            <button id="adminBackHome">⬅ Back to Home</button>
+        </div>
+    </div>
+
+    <div data-role="footer">
+        © 2024 MediConnect
+    </div>
+</div>
+
+<script>
+    // Admin show/hide toggle for admin password
+    const passInput = document.getElementById('adminPass');
+    const togglePass = document.getElementById('togglePass');
+    togglePass.addEventListener('click', () => {
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            togglePass.textContent = '🙈';
+        } else {
+            passInput.type = 'password';
+            togglePass.textContent = '👁️';
+        }
+    });
+
+    // Admin login handler (separate from main login)
+    document.getElementById('adminLoginBtn').addEventListener('click', function(){
+        const user = document.getElementById('adminUser').value.trim();
+        const pass = document.getElementById('adminPass').value.trim();
+        if (user === 'admin' && pass === '1234') {
+            isAdminSession = true;
+            $("#adminLoginForm").hide();
+            $("#adminContent").show();
+            $(".menu-btn[data-target='admin']").show();
+            loadAdminTable();
+        } else {
+            alert('Invalid username or password!');
+        }
+    });
+
+    // Protect the admin page: block if not logged in
+    $(document).on("pagebeforeshow", "#admin", function () {
+        if (!isAdminSession) {
+            alert("Unauthorized access!");
+            $.mobile.changePage("#login");
+        } else {
+            $("#adminLoginForm").hide();
+            $("#adminContent").show();
+            loadAdminTable();
+        }
+    });
+
+    // Admin back home keeps session
+    $("#adminBackHome").on("click", function () {
+        isAdminSession = true;
+        $.mobile.changePage("#home", {
+            transition: "slide",
+            reverse: true
+        });
+    });
+</script>
+
+<!-- ================== JS CODE (appointments, queue, navigation) ================== -->
+<script>
+let appointments = [];
+let queueAppointments = [];
+let currentQueue = 0; // last-served number
+let myQueueNumber = null;
+
+$(document).ready(function(){
+
+    // Centralized navigation handler that respects data-transition if present
+    $(".menu-btn, button[data-target], .shortcut-btn").on("click", function(e){
+        let $t = $(this);
+        let target = $t.data("target");
+        if (!target) return;
+
+        let transition = $t.data("transition") || "slide";
+        if (target === "home" && !isAdminSession) $(".menu-btn[data-target='admin']").hide();
+
+        $.mobile.changePage("#" + target, { transition: transition });
+
+        if(target === "profile") loadHistory();
+        if(target === "admin") loadAdminTable();
+        if(target === "queue") updateQueueDisplay();
+    });
+
+    // Back buttons using .back class
+    $(".back").on("click", function(){
+        let target = $(this).data("target") || "home";
+        $.mobile.changePage("#" + target);
+    });
+
+    // Reset appointment form
+    $("#resetForm").click(function(){
+        $("#name, #email, #contact, #date, #time").val("");
+        $("#illnessSelect").val("");
+        $("#barangaySelect").val("");
+    });
+
+
+    // Submit appointment
+    $("#submitApp").click(function(){
+        let name = $("#name").val().trim();
+        let email = $("#email").val().trim();
+        let contact = $("#contact").val().trim();
+        let illness = $("#illnessSelect").val();
+        let date = $("#date").val();
+        let time = $("#time").val();
+        let barangay = $("#barangaySelect").val();
+
+        if (!email.includes("@")) {
+            alert("Please enter a valid email address with '@'.");
+            emailInput.focus();
+            return;
+        }
+
+         // Contact number validation
+         if (contact.length !== 11) {
+            alert("Contact number must be exactly 11 digits.");
+            $("#contact").focus();
+            return false;
+        }
+        
+
+        if(!name || !email || !contact || !illness || !date || !time || !barangay){
+            alert("Please complete all fields.");
+            return;
+        }
+
+        let appointment = {name,email,contact,illness,date,time,status:"Pending",barangay};
+        appointments.push(appointment);
+
+        myQueueNumber = queueAppointments.length + 1;
+        queueAppointments.push({name,service:illness,barangay,queue:myQueueNumber});
+
+        alert("✅ Appointment submitted! Your queue number is " + myQueueNumber);
+        $("#profileName").text(name);
+        $("#resetForm").click();
+
+        // Return to Home
+        $.mobile.changePage("#home", {
+            transition: "slide",
+            reverse: true
+        });
+
+        // If admin is viewing, update table
+        loadAdminTable();
+    });
+
+    // Load history with optional filter (uses original appointments indices)
+    function loadHistory(filterStatus = null){
+        $("#history").html("");
+        let completedCount = 0;
+        let pendingCount = 0;
+
+        appointments.forEach((app) => {
+            if (app.status === "Completed") completedCount++;
+            if (app.status === "Pending") pendingCount++;
+        });
+
+        $(".badge-btn[data-status='Completed']").text("Completed: " + completedCount);
+        $(".badge-btn[data-status='Pending']").text("Pending: " + pendingCount);
+
+        let any = false;
+        appointments.forEach((app,index)=>{
+            if (filterStatus && app.status !== filterStatus) return;
+            any = true;
+            let markBtn = app.status==="Pending" ? `<button class="mark-completed" data-index="${index}">Mark as Completed</button>` : "";
+            $("#history").append(`<div class="history-box ${app.status}"><b>${app.illness}</b> [${app.status}]<br>${app.date} at ${app.time}<br><small>${app.name}</small><br>${markBtn}</div>`);
+        });
+
+        if(!any) $("#history").html("<p>No appointments yet.</p>");
+    }
+
+    // badge filters
+    $(".badge-btn").click(function(){
+        let status = $(this).data("status");
+        loadHistory(status);
+    });
+
+    // mark completed handler
+    $(document).on("click",".mark-completed",function(){
+        let index = $(this).data("index");
+        if (appointments[index]) {
+            appointments[index].status="Completed";
+            loadHistory();
+        }
+    });
+
+    // admin panel buttons
+    $("#btnNext").on("click", function(){
+        nextPatient();
+    });
+    $("#btnReset").on("click", function(){
+        resetQueue();
+    });
+
+    // refresh queue button
+    $("#refreshQueue").on("click", updateQueueDisplay);
+
+    // set current date/time on appointment page
+    setCurrentDateTime();
+    setInterval(setCurrentDateTime, 60000);
+
+    // ensure admin button visibility on home pageshow
+    $(document).on("pageshow", "#home", function () {
+        if (isAdminSession) {
+            $(".menu-btn[data-target='admin']").show();
+        } else {
+            $(".menu-btn[data-target='admin']").hide();
+        }
+    });
+});
+
+// Queue display
+function updateQueueDisplay(){
+    if(queueAppointments.length===0 || myQueueNumber===null){
+        $("#queueInfo").html("No queue number assigned yet.");
+        return;
+    }
+    let peopleAhead = Math.max(0, myQueueNumber - currentQueue);
+    $("#queueInfo").html(`<p>Your Queue Number: <b>${myQueueNumber}</b></p><p>Current Number: <b>${currentQueue}</b></p><p>People Ahead: <b>${peopleAhead}</b></p>`);
+}
+
+// Admin table loader: highlights the row whose queue number === currentQueue (currently being served).
+function loadAdminTable(){
+    let rows = "";
+    queueAppointments.forEach(app => {
+        // determine if this row is the current patient
+        const isCurrent = (currentQueue > 0 && app.queue === currentQueue);
+        const trClass = isCurrent ? 'class="current-row"' : '';
+        rows+=`<tr ${trClass} id="row-queue-${app.queue}" style="position:relative;"><td>${app.name}</td><td>${app.service}</td><td>${app.barangay}</td><td>${app.queue}</td></tr>`;
+    });
+    $("#apptTable").html(rows);
+
+    // Remove persistent pulse from all rows, then add to the current-row to keep it noticeable
+    $("#apptTable tr").removeClass("pulse");
+    const $current = $("#apptTable tr.current-row");
+    if ($current.length) {
+        // Add a one-time "highlight" animation class, then keep a subtle pulse
+        $current.removeClass("highlight");
+        // Use short delay to ensure CSS reflow triggers the animation
+        setTimeout(() => {
+            $current.addClass("highlight");
+            // after the highlight animation ends, add a subtle persistent pulse class
+            setTimeout(() => {
+                $current.removeClass("highlight");
+                $current.addClass("pulse");
+            }, 1000); // matches animation duration in CSS (1000ms)
+        }, 20);
+    }
+}
+
+// Next patient (admin) - increments currentQueue and moves highlight to the new current patient
+function nextPatient(){
+    if(queueAppointments.length === 0) {
+        alert("No queued patients.");
+        return;
+    }
+
+    // compute the smallest queue number greater than currentQueue
+    const remaining = queueAppointments.map(q => q.queue).sort((a,b) => a - b).filter(n => n > currentQueue);
+    if (remaining.length === 0) {
+        alert("No more patients in queue.");
+        return;
+    }
+    currentQueue = remaining[0];
+
+    // Mark the corresponding appointment completed if found (keeps history up-to-date)
+    const qObj = queueAppointments.find(q => q.queue === currentQueue);
+    if (qObj) {
+        const apptIndex = appointments.findIndex(a => a.name === qObj.name && a.illness === qObj.service && a.barangay === qObj.barangay && a.status === "Pending");
+        if (apptIndex !== -1) appointments[apptIndex].status = "Completed";
+    }
+
+    // Update table highlight and queue display
+    loadAdminTable();
+    updateQueueDisplay();
+}
+
+// Reset queue
+function resetQueue(){
+    if(!confirm("Reset all queue data?")) return;
+    queueAppointments = [];
+    currentQueue = 0;
+    myQueueNumber = null;
+    loadAdminTable();
+    updateQueueDisplay();
+}
+
+// Auto-fill current date & time for appointment
+function setCurrentDateTime() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const hh = String(today.getHours()).padStart(2, '0');
+    const min = String(today.getMinutes()).padStart(2, '0');
+
+    // only set if not manually changed
+    if (!$("#date").val()) $("#date").val(`${yyyy}-${mm}-${dd}`);
+    if (!$("#time").val()) $("#time").val(`${hh}:${min}`);
+}
+</script>
+
+</body>
+</html>
