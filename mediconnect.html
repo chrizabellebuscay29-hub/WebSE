@@ -1039,6 +1039,25 @@ p, li, label {
     }
 }
 
+/* -------- INPUTS -------- */
+input,
+select {
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(13,110,253,.25);
+    background: #ffffff;
+    color: var(--text-main);
+}
+
+input::placeholder {
+    color: var(--text-muted);
+}
+
+input:focus,
+select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(13,110,253,.18);
+} 
+
 
 </style>
 </head>
